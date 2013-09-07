@@ -1,0 +1,23 @@
+//starting comment
+GO TURN VAR JUMP FOR STEP TO DO BEGIN END sin cos sqrt ; + - * / () =
+lex = go + GO * (9);
+VAR var = 3.14 * 2 + lex - 1234567890 /sin(-2 ) - cos(9001)
+*sqrt(-3) + sin(cos(sqrt(var)))
+FOR i = 6 STEP -3 TO -666
+BEGIN//mid line comment
+DO
+TURN 345.567
+JUMP go
+END
+lex = go + GO * (9); VAR var = 3.14 * 2 + lex - 1234567890 /sin(-2 ) - cos(9001) *sqrt(-3) + sin(cos(sqrt(var))) FOR i = 6 STEP -3 TO -666 BEGIN DO TURN 345.567 JUMP go END //mid line comment
+//lex = go + GO * (9); VAR var = 3.14 * 2 + lex - 1234567890 /sin(-2 ) - cos(9001) *sqrt(-3) + sin(cos(sqrt(var))) FOR i = 6 STEP -3 TO -666 BEGIN DO TURN 345.567 JUMP go END //mid line comment
+//illegal 3. & % $ # @ ! ~` []{}|<>? .14
+lskdjf sldkfj weriu mnbxcv abzxvq poivb
+gtdyj
+fghn
+fgu
+234
+4365.7
+-23
+/1/2/3/
+      //end

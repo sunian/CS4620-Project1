@@ -24,6 +24,19 @@
 #define OPEN 279
 #define CLOSE 280
 #define ASSIGN 281
+#define IF 282
+#define ELSE 283
+#define WHILE 284
+#define PROCEDURE 285
+#define EQUALS 286
+#define GREATEROREQ 287
+#define LESSOREQ 288
+#define GREATERTHAN 289
+#define LESSTHAN 290
+#define START 291
+#define END 292
+#define THEN 293
+#define COMMA 294
 
 
 

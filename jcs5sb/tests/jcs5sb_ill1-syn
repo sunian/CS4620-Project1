@@ -1,0 +1,12 @@
+//decllist
+VAR vara; VAR varb;
+VAR varc;
+
+VAR               vard          ;
+VAR i;
+
+//stmtlist
+vara = 1; varc = -3.14;
+GO varb / varc //missing semicolon
+JUMP sin(vara - cos(123); //unbalanced parentheses
+

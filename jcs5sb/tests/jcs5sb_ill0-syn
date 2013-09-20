@@ -1,0 +1,16 @@
+//decllist
+VAR vara; VAR varb;
+VAR varc;
+
+VAR               vard          ;
+VAR i;
+
+//stmtlist
+vara = 1; varc = -3.14;
+GO varb / varc;
+JUMP sin(vara - cos(123));
+
+FOR i = varb STEP vard TO varc DO varb = (vara + varc) * -42;//single line for loop
+
+//more declarations
+VAR varafterstmts;

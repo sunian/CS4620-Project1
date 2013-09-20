@@ -1,0 +1,35 @@
+//decllist
+VAR vara; VAR varb;
+VAR varc;
+
+VAR               vard          ;
+VAR i;
+
+//stmtlist
+vara = 1; varc = -3.14;
+varb = (vara + varc) * -42;
+GO varb / varc;
+JUMP sin(vara - cos(123));
+
+vard            =         -        (73.0 );
+
+TURN sqrt(
+(varb - var) * 
+(vara + vard) / 
+sqrt(-vard)
+);GO vara / varc;
+
+FOR i = varb STEP vard TO varc DO
+BEGIN TURN sqrt(//multiline for loop
+(varb - var) * 
+(vara + vard) / 
+sqrt(-vard)
+);GO vara / varc;
+vara = 1; varc = -3.14;
+varb = (vara + varc) * -42;
+
+GO varb / varc;
+JUMP sin(vara - cos(123));
+END
+
+FOR i = varb STEP vard TO varc DO varb = (vara + varc) * -42;//single line for loop

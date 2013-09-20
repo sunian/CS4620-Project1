@@ -30,6 +30,7 @@ cos             return COS;
 sqrt            return SQRT;
 
 ==              return EQUALS;
+!=              return NOTEQUALS;
 \>=             return GREATEROREQ;
 \<=             return LESSOREQ;
 \>              return GREATERTHAN;

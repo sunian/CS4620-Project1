@@ -1,18 +1,27 @@
-jcs5sb.out: jcs5sb.tlt scanner 
-	./scanner < jcs5sb.tlt > jcs5sb.out
 
-eins.out: eins.tlt scanner 
-	./scanner < eins.tlt > eins.out
+all: turtle eins.ps
 
-lex.yy.o:  lex.yy.c token.h symtab.h
+eins.ps: eins.tlt turtle
+	./turtle < eins.tlt > eins.ps
+
+lex.yy.o:  lex.yy.c turtle.tab.h symtab.h
 	gcc -c lex.yy.c
 
-lex.yy.c: turtle_jcs5sb.l
-	flex turtle_jcs5sb.l
+lex.yy.c: turtle.l
+	flex turtle.l
 	
-scanner:  lex.yy.o symtab.c
-	gcc lex.yy.o symtab.c -lfl -o scanner 
+turtle.tab.h: turtle.y
+	bison -d turtle.y
+	
+turtle.tab.c: turtle.y
+	bison -d turtle.y
+	
+turtle.tab.o: turtle.tab.c symtab.h
+	gcc -c turtle.tab.c
+
+turtle: turtle.tab.o lex.yy.o symtab.c
+	gcc lex.yy.o turtle.tab.o symtab.c -lfl -o turtle
 
 clean:
-	rm -f scanner lex.* 
+	rm -f turtle lex.* turtle.tab.* *.o
 

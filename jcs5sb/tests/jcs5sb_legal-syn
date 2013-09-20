@@ -31,5 +31,3 @@ varb = (vara + varc) * -42;
 GO varb / varc;
 JUMP sin(vara - cos(123));
 END
-
-FOR i = varb STEP vard TO varc DO varb = (vara + varc) * -42;//single line for loop

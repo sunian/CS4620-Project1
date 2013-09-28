@@ -1,16 +1,22 @@
 %!PS Adobe
 
-newpath 0 0 moveto
+newpath
+0 0 moveto
+
 /tltmyvar 0 def
 4 /tltmyvar exch store
-300 0 rmoveto
-90 rotate
-300 0 rmoveto
+tltmyvar 4 eq
+{
 40 0 rlineto
-42 2 100 { /tltmyvar exch store
 90 rotate
-tltmyvar 0 rlineto
-} for
+40 0 rlineto
+90 rotate
+40 0 rlineto
+90 rotate
+40 0 rlineto
+90 rotate
+} if
+80 0 rmoveto
 tltmyvar 7 ge
 {
 40 0 rlineto
@@ -29,4 +35,5 @@ tltmyvar 7 ge
 30 0 rlineto
 120 rotate
 } ifelse
+closepath
 stroke

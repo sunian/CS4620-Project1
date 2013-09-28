@@ -1,16 +1,23 @@
 VAR myvar;
 
 myvar=4;
-JUMP 300;
-TURN 90;
-JUMP 300;
+
 // should draw a rectangle
-GO 40;
-FOR myvar=42 STEP 2 TO 100 DO
-BEGIN
-TURN 90;
-GO myvar;
-END
+IF(myvar==4) THEN {
+    GO 40;
+    TURN 90;
+    GO 40;
+    TURN 90;
+    GO 40;
+    TURN 90;
+    GO 40;
+    TURN 90;
+}
+
+// reset turtle position
+JUMP 80;
+
+//should take ELSE and draw a triangle
 IF(myvar>=7) THEN {
 GO 40;
 TURN 90;

@@ -28,13 +28,11 @@
 %%
 program: head decllist stmtlist tail;
 
-head: { printf("%%!PS Adobe\n"
-               "\n"
-	       "newpath 0 0 moveto\n"
+head: { printf("%%!PS Adobe\n\nnewpath\n0 0 moveto\n\n"
 	       );
       };
 
-tail: { printf("stroke\n"); };
+tail: { printf("closepath\nstroke\n"); };
 
 decllist: ;
 decllist: decllist decl;
@@ -47,12 +45,15 @@ stmtlist: stmtlist stmt ;
 
 stmt: IF OPEN condition CLOSE THEN 
 	{printf("{\n");} 
-	BOPEN stmtlist BCLOSE { printf("} {\n");}
-	ELSE BOPEN stmtlist BCLOSE { printf("} ifelse\n");};
+	BOPEN stmtlist BCLOSE else;
 
-stmt: IF OPEN condition CLOSE THEN 
-	{printf("{\n");} 
-	BOPEN stmtlist BCLOSE { printf("} if\n");};
+else: { printf("} if\n");};
+else: ELSE { printf("} {\n");} BOPEN stmtlist BCLOSE { printf("} ifelse\n");};
+
+stmt: WHILE {printf("{ ");} OPEN condition CLOSE
+	{printf("{} {exit} ifelse\n");}
+	BOPEN stmtlist BCLOSE
+	{ printf("} loop\n");};
 
 stmt: ID ASSIGN expr SEMICOLON {printf("/tlt%s exch store\n",$1->symbol);} ;
 stmt: GO expr SEMICOLON {printf("0 rlineto\n");};

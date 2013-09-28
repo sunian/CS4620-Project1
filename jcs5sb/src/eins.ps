@@ -3,5 +3,13 @@
 newpath 0 0 moveto
 /tltmyvar 0 def
 4 /tltmyvar exch store
+300 0 rmoveto
+90 rotate
+300 0 rmoveto
 40 0 rlineto
-4 4 
+42 2 100 { /tltmyvar exch store
+90 rotate
+tltmyvar 0 rlineto
+} for
+tltmyvar 42 gt if
+stroke

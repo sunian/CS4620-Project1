@@ -62,17 +62,19 @@
      CLOSE = 280,
      ASSIGN = 281,
      IF = 282,
-     THEN = 283,
-     ELSE = 284,
-     START = 285,
-     END = 286,
-     WHILE = 287,
-     EQUALS = 288,
-     NOTEQUALS = 289,
-     GREATEROREQ = 290,
-     LESSOREQ = 291,
-     GREATERTHAN = 292,
-     LESSTHAN = 293
+     ELSE = 283,
+     WHILE = 284,
+     PROCEDURE = 285,
+     EQUALS = 286,
+     GREATEROREQ = 287,
+     LESSOREQ = 288,
+     GREATERTHAN = 289,
+     LESSTHAN = 290,
+     BOPEN = 291,
+     BCLOSE = 292,
+     THEN = 293,
+     COMMA = 294,
+     NOTEQUALS = 295
    };
 #endif
 
@@ -88,7 +90,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 92 "jcs5sb.tab.h"
+#line 94 "jcs5sb.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

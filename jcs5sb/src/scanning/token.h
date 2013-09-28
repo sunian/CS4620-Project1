@@ -35,7 +35,7 @@
 #define LESSTHAN 290
 #define BOPEN 291
 #define BCLOSE 292
-#define THEN 293
+#define IFTHEN 293
 #define COMMA 294
 #define NOTEQUALS 295
 

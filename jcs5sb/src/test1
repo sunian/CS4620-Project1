@@ -1,7 +1,14 @@
 VAR myvar;
 
 myvar=4;
-
+JUMP 300;
+TURN 90;
+JUMP 300;
 // should draw a rectangle
 GO 40;
-IF (4 > 4) THEN { TURN 90; }
+FOR myvar=42 STEP 2 TO 100 DO
+BEGIN
+TURN 90;
+GO myvar;
+END
+IF(myvar>42)

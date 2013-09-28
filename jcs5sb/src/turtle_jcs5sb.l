@@ -30,13 +30,14 @@ cos             return COS;
 sqrt            return SQRT;
 
 ==              return EQUALS;
-!=              return NOTEQUALS;
-\>=             return GREATEROREQ;
+===              return NOTEQUALS;
+>=             return GREATEROREQ;
 \<=             return LESSOREQ;
-\>              return GREATERTHAN;
+>              return GREATERTHAN;
 \<              return LESSTHAN;
-\{              return START;
-\}              return END;
+
+\{              return BOPEN;
+\}              return BCLOSE;
 
 ;               return SEMICOLON;
 \+              return PLUS;

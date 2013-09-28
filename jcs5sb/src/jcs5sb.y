@@ -14,8 +14,13 @@
 %token <n> ID
 %token <i> NUMBER
 %token SEMICOLON PLUS MINUS TIMES DIV OPEN CLOSE ASSIGN
-%token IF THEN ELSE START END WHILE
-%token EQUALS NOTEQUALS GREATEROREQ LESSOREQ GREATERTHAN LESSTHAN
+%token IF ELSE WHILE PROCEDURE
+%token EQUALS GREATEROREQ LESSOREQ GREATERTHAN LESSTHAN
+%token BOPEN
+%token BCLOSE
+%token THEN
+%token COMMA
+%token NOTEQUALS
 
 %type <n> decl
 %type <n> decllist
@@ -40,6 +45,9 @@ decl: VAR ID SEMICOLON { printf("/tlt%s 0 def\n",$2->symbol);} ;
 stmtlist: ;
 stmtlist: stmtlist stmt ;
 
+stmt: IF OPEN condition CLOSE  { printf("if\n");};
+/* stmt: IF OPEN condition CLOSE THEN START stmtlist END ELSE START stmtlist END; */
+
 stmt: ID ASSIGN expr SEMICOLON {printf("/tlt%s exch store\n",$1->symbol);} ;
 stmt: GO expr SEMICOLON {printf("0 rlineto\n");};
 stmt: JUMP expr SEMICOLON {printf("0 rmoveto\n");};
@@ -53,15 +61,12 @@ stmt: FOR ID ASSIGN expr
 
 stmt: COPEN stmtlist CCLOSE; 
 
-stmt: IF OPEN condition CLOSE THEN START stmtlist END;
-stmt: IF OPEN condition CLOSE THEN START stmtlist END ELSE START stmtlist END;
-
-condition: expr EQUALS expr;
-condition: expr NOTEQUALS expr;
-condition: expr GREATEROREQ expr;
-condition: expr LESSOREQ expr;
-condition: expr GREATERTHAN expr;
-condition: expr LESSTHAN expr;
+condition: expr EQUALS expr {printf("eq ");};
+condition: expr NOTEQUALS expr {printf("neq ");};
+condition: expr GREATEROREQ expr {printf("gte ");};
+condition: expr LESSOREQ expr {printf("lte ");};
+condition: expr GREATERTHAN expr {printf("gt ");};
+condition: expr LESSTHAN expr {printf("lt ");};
 
 expr: expr PLUS term { printf("add ");};
 expr: expr MINUS term { printf("sub ");};
@@ -88,12 +93,16 @@ atomic: ID {printf("tlt%s ", $1->symbol);};
 
 %%
 int yyerror(char *msg)
-{  fprintf(stderr,"Error: %s\n",msg);
-   return 0;
+{
+	extern int yylineno;	// defined and maintained in lex.c
+	extern char *yytext;	// defined and maintained in lex.c
+	fprintf(stderr,"bison error: %s at symbol \"%s\" on line %d\n",msg,yytext,yylineno);
+	return 0;
 }
 
 int main(void)
-{   yyparse();
-    return 0;
+{
+	yyparse();
+	return 0;
 }
 

@@ -11,5 +11,22 @@ newpath 0 0 moveto
 90 rotate
 tltmyvar 0 rlineto
 } for
-tltmyvar 42 gt if
+tltmyvar 7 ge
+{
+40 0 rlineto
+90 rotate
+40 0 rlineto
+90 rotate
+40 0 rlineto
+90 rotate
+40 0 rlineto
+90 rotate
+} {
+30 0 rlineto
+120 rotate
+30 0 rlineto
+120 rotate
+30 0 rlineto
+120 rotate
+} ifelse
 stroke

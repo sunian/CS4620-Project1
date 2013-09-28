@@ -45,8 +45,14 @@ decl: VAR ID SEMICOLON { printf("/tlt%s 0 def\n",$2->symbol);} ;
 stmtlist: ;
 stmtlist: stmtlist stmt ;
 
-stmt: IF OPEN condition CLOSE  { printf("if\n");};
-/* stmt: IF OPEN condition CLOSE THEN START stmtlist END ELSE START stmtlist END; */
+stmt: IF OPEN condition CLOSE THEN 
+	{printf("{\n");} 
+	BOPEN stmtlist BCLOSE { printf("} {\n");}
+	ELSE BOPEN stmtlist BCLOSE { printf("} ifelse\n");};
+
+stmt: IF OPEN condition CLOSE THEN 
+	{printf("{\n");} 
+	BOPEN stmtlist BCLOSE { printf("} if\n");};
 
 stmt: ID ASSIGN expr SEMICOLON {printf("/tlt%s exch store\n",$1->symbol);} ;
 stmt: GO expr SEMICOLON {printf("0 rlineto\n");};
@@ -61,12 +67,12 @@ stmt: FOR ID ASSIGN expr
 
 stmt: COPEN stmtlist CCLOSE; 
 
-condition: expr EQUALS expr {printf("eq ");};
-condition: expr NOTEQUALS expr {printf("neq ");};
-condition: expr GREATEROREQ expr {printf("gte ");};
-condition: expr LESSOREQ expr {printf("lte ");};
-condition: expr GREATERTHAN expr {printf("gt ");};
-condition: expr LESSTHAN expr {printf("lt ");};
+condition: expr EQUALS expr {printf("eq\n");};
+condition: expr NOTEQUALS expr {printf("ne\n");};
+condition: expr GREATEROREQ expr {printf("ge\n");};
+condition: expr LESSOREQ expr {printf("le\n");};
+condition: expr GREATERTHAN expr {printf("gt\n");};
+condition: expr LESSTHAN expr {printf("lt\n");};
 
 expr: expr PLUS term { printf("add ");};
 expr: expr MINUS term { printf("sub ");};

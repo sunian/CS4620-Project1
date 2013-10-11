@@ -26,18 +26,24 @@
 %type <n> decllist
 
 %%
-program: head decllist stmtlist tail;
+program: head decllist { printf("\n"); } stmtlist tail;
 
-head: { printf("%%!PS Adobe\n\nnewpath\n0 0 moveto\n\n"
-	       );
-      };
+head: { printf("%%!PS Adobe\n\nnewpath\n0 0 moveto\n"); };
 
 tail: { printf("closepath\nstroke\n"); };
 
-decllist: ;
+decllist: { printf("\n"); };
 decllist: decllist decl;
 
-decl: VAR ID SEMICOLON { printf("/tlt%s 0 def\n",$2->symbol);} ;
+decl: VAR ID SEMICOLON {
+			if (strlen($2->symbol) > 1020) {
+				fprintf(stderr,"compile error: Variable name length cannot exceed 1020 characters:\n%s\n", $2->symbol);
+				YYERROR;
+			}
+			else {
+				printf("/tlt%s 0 def\n",$2->symbol);
+			}
+		};
 
 
 stmtlist: ;
@@ -60,13 +66,13 @@ stmt: GO expr SEMICOLON {printf("0 rlineto\n");};
 stmt: JUMP expr SEMICOLON {printf("0 rmoveto\n");};
 stmt: TURN expr SEMICOLON {printf("rotate\n");};
 
-stmt: FOR ID ASSIGN expr 
-          STEP expr
-	  TO expr
-	  DO {printf("{ /tlt%s exch store\n",$2->symbol);} 
-	     stmt {printf("} for\n");};
+stmt: FOR ID ASSIGN expr STEP expr TO expr DO 
+		{printf("{ /tlt%s exch store\n",$2->symbol);} 
+	     stmtBlock {printf("} for\n");};
 
-stmt: COPEN stmtlist CCLOSE; 
+
+stmtBlock: COPEN stmtlist CCLOSE; 
+stmtBlock: stmt;
 
 condition: expr EQUALS expr {printf("eq\n");};
 condition: expr NOTEQUALS expr {printf("ne\n");};
@@ -95,7 +101,7 @@ factor: atomic;
 atomic: OPEN expr CLOSE;
 atomic: NUMBER {printf("%d ",$1);};
 atomic: FLOAT {printf("%f ",$1);};
-atomic: ID {printf("tlt%s ", $1->symbol);};
+atomic: ID { printf("tlt%s ", $1->symbol); };
 
 
 %%
@@ -103,7 +109,8 @@ int yyerror(char *msg)
 {
 	extern int yylineno;	// defined and maintained in lex.c
 	extern char *yytext;	// defined and maintained in lex.c
-	fprintf(stderr,"bison error: %s at symbol \"%s\" on line %d\n",msg,yytext,yylineno);
+	//fprintf(stderr,"compile error: %s at symbol \"%s\" on line %d\n",msg,yytext,yylineno);
+	fprintf(stderr,"compile error: %s at symbol \"%s\"\n",msg,yytext);
 	return 0;
 }
 

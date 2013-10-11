@@ -1,5 +1,5 @@
 
-all: turtle eins.ps
+#all: turtle eins.ps
 
 eins.ps: eins.tlt turtle
 	./turtle < test1 > eins.ps

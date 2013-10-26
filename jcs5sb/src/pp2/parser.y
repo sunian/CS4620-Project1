@@ -95,7 +95,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
 %type <stmt>      StmtBlock Stmt
-%type <expr>      Expr LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr
+%type <expr>      Expr LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr UnaryExpr
 %type <exprList>  Actuals ActualList
 %%
 /* Rules
@@ -172,10 +172,11 @@ Stmt      : Expr ';'                        {$$ = $1;}
           | T_Break ';'                     {$$ = new BreakStmt(@1);}
           | T_Return Expr ';'               {$$ = new ReturnStmt(@1, $2);}
           | T_Print '(' ActualList ')' ';'  {$$ = new PrintStmt($3);}
+          | StmtBlock                       {$$ = $1;}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
           | OrExpr            {$$ = $1;}
-          
+
 OrExpr    : AndExpr                   {$$ = $1;}
           | OrExpr T_Or AndExpr       {$$ = new LogicalExpr($1, new Operator(@2, "||"), $3);}
 
@@ -186,9 +187,10 @@ AddExpr   : MultExpr                  {$$ = $1;}
           | AddExpr '+' MultExpr      {$$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3);}
           | AddExpr '-' MultExpr      {$$ = new ArithmeticExpr($1, new Operator(@2, "-"), $3);}
 
-MultExpr  : AtomicExpr                {$$ = $1;}
-          | MultExpr '*' AtomicExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
-          | MultExpr '/' AtomicExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
+MultExpr  : UnaryExpr                {$$ = $1;}
+          | MultExpr '*' UnaryExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
+          | MultExpr '/' UnaryExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
+          | MultExpr '%' UnaryExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "%"), $3);}
 
 RelationalExpr  : AddExpr {$$ = $1;}
                 | AddExpr T_Equal AddExpr          {$$ = new EqualityExpr($1, new Operator(@2, "=="), $3);}
@@ -198,13 +200,19 @@ RelationalExpr  : AddExpr {$$ = $1;}
                 | AddExpr '<' AddExpr              {$$ = new RelationalExpr($1, new Operator(@2, "<"), $3);}
                 | AddExpr '>' AddExpr              {$$ = new RelationalExpr($1, new Operator(@2, ">"), $3);}
 
-AtomicExpr: '(' Expr ')'          {$$ = $2;}
-          | T_ReadInteger '(' ')' {$$ = new ReadIntegerExpr(@1);}
-          | T_ReadLine '(' ')' {$$ = new ReadLineExpr(@1);}
-          | Constant          {$$ = $1;}
-          | LValue            {$$ = $1;}
-          | T_This            {$$ = new This(@1);}
-          | Call              {$$ = $1;}
+UnaryExpr : '-' AtomicExpr    {$$ = new ArithmeticExpr(new Operator(@1, "-"), $2);}
+          | '!' AtomicExpr    {$$ = new LogicalExpr(new Operator(@1, "!"), $2);}
+          | AtomicExpr        {$$ = $1;}
+
+AtomicExpr: '(' Expr ')'                      {$$ = $2;}
+          | T_ReadInteger '(' ')'             {$$ = new ReadIntegerExpr(@1);}
+          | T_ReadLine '(' ')'                {$$ = new ReadLineExpr(@1);}
+          | Constant                          {$$ = $1;}
+          | LValue                            {$$ = $1;}
+          | T_This                            {$$ = new This(@1);}
+          | Call                              {$$ = $1;}
+          | T_New '(' T_Identifier ')'        {$$ = new NewExpr(@1, new NamedType(new Identifier(@3,$3)));}
+          | T_NewArray '(' Expr ',' Type ')'  {$$ = new NewArrayExpr(@1, $3, $5);}
 
 LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1));}
 

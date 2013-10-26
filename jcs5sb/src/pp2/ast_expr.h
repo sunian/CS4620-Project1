@@ -240,5 +240,16 @@ class ReadLineExpr : public Expr
     const char *GetPrintNameForNode() { return "ReadLineExpr"; }
 };
 
+class PostfixExpr : public Expr 
+{
+  protected:
+    Operator *op;
+    Expr *left;
+
+  public:
+    PostfixExpr(Expr *lhs, Operator *op);
+    void PrintChildren(int indentLevel);
+    const char *GetPrintNameForNode() { return "PostfixExpr"; }
+};
     
 #endif

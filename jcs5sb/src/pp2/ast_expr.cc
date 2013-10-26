@@ -129,4 +129,14 @@ void NewArrayExpr::PrintChildren(int indentLevel) {
     elemType->Print(indentLevel+1);
 }
 
-       
+PostfixExpr::PostfixExpr(Expr *l, Operator *o) 
+  : Expr(Join(o->GetLocation(), l->GetLocation())) {
+    Assert(o != NULL && l != NULL);
+    (op=o)->SetParent(this);
+    (left=l)->SetParent(this);
+}
+
+void PostfixExpr::PrintChildren(int indentLevel) {
+   left->Print(indentLevel+1);
+   op->Print(indentLevel+1);
+}       

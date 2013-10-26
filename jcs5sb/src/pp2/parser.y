@@ -66,7 +66,7 @@ void yyerror(const char *msg); // standard error-handling routine
  * in the generated y.tab.h header file.
  */
 %token   T_Void T_Bool T_Int T_Double T_String T_Class 
-%token   T_LessEqual T_GreaterEqual T_Equal T_NotEqual T_Dims
+%token   T_LessEqual T_GreaterEqual T_Equal T_NotEqual T_Dims T_Inc T_Dec
 %token   T_And T_Or T_Null T_Extends T_This T_Interface T_Implements
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_New T_NewArray T_Print T_ReadInteger T_ReadLine
@@ -260,6 +260,8 @@ RelationalExpr  : AddExpr {$$ = $1;}
 
 UnaryExpr : '-' AtomicExpr    {$$ = new ArithmeticExpr(new Operator(@1, "-"), $2);}
           | '!' AtomicExpr    {$$ = new LogicalExpr(new Operator(@1, "!"), $2);}
+          | AtomicExpr T_Inc  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
+          | AtomicExpr T_Dec  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
           | AtomicExpr        {$$ = $1;}
 ;
 

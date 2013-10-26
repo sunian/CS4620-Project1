@@ -112,6 +112,8 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "!="                { return T_NotEqual;    }
 "&&"                { return T_And;         }
 "||"                { return T_Or;          }
+"++"                { return T_Inc;         }
+"--"                { return T_Dec;         }
 {OPERATOR}          { return yytext[0];     }
     
 "[]"                { return T_Dims;        }

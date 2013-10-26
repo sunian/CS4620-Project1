@@ -220,7 +220,7 @@ Stmt      : ExprOrNot ';'                                         {$$ = $1;}
           | StmtBlock                                             {$$ = $1;}
           | T_While '(' Expr ')' Stmt                             {$$ = new WhileStmt($3, $5);}
           | T_For '(' ExprOrNot ';' Expr ';' ExprOrNot ')' Stmt   {$$ = new ForStmt($3, $5, $7, $9);}
-          | T_If '(' Expr ')' Stmt                                {$$ = new IfStmt($3, $5, new EmptyExpr());} 
+          | T_If '(' Expr ')' Stmt                                {$$ = new IfStmt($3, $5, NULL);} 
           | T_If '(' Expr ')' Stmt T_Else Stmt                    {$$ = new IfStmt($3, $5, $7);} 
 ;
 

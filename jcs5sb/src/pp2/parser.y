@@ -93,7 +93,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <varList>   Formals FormalList VarDecls
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
-%type <stmt>      StmtBlock Stmt
+%type <stmt>      StmtBlock Stmt ReturnStmt
 %type <expr>      Expr LValue Constant Call
 %%
 /* Rules
@@ -165,8 +165,13 @@ StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
           | /* empty*/     { $$ = new List<Stmt*>; }
 ;
 
-Stmt      : ';'       {$$ = new EmptyExpr();}
-          | Expr ';'  {$$ = $1;}
+Stmt      : ';'           {$$ = new EmptyExpr();}
+          | Expr ';'      {$$ = $1;}
+          | T_Break ';'   {$$ = new BreakStmt(@1);}
+          | ReturnStmt    {$$ = $1;}
+
+ReturnStmt: T_Return Expr ';' {$$ = new ReturnStmt(@1, $2);}
+          | T_Return ';'      {$$ = new ReturnStmt(@1, new EmptyExpr());}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
           | Constant          {$$ = $1;}

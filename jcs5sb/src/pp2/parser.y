@@ -95,7 +95,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
 %type <stmt>      StmtBlock Stmt
-%type <expr>      Expr LValue Constant Call
+%type <expr>      Expr LValue Constant Call AtomicExpr
 %type <exprList>  Actuals ActualList
 %%
 /* Rules
@@ -173,11 +173,15 @@ Stmt      : Expr ';'              {$$ = $1;printf("ExprStmt\n");}
           | T_Return Expr ';'      {$$ = new ReturnStmt(@1, $2);}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
+          | AtomicExpr        {$$ = $1;}
+
+AtomicExpr: '(' Expr ')'          {$$ = $2;}
+          | T_ReadInteger '(' ')' {$$ = new ReadIntegerExpr(@1);}
+          | T_ReadLine '(' ')' {$$ = new ReadLineExpr(@1);}
           | Constant          {$$ = $1;printf("Constant expr\n");}
           | LValue            {$$ = $1;}
           | T_This            {$$ = new This(@1);}
           | Call              {$$ = $1;}
-          | '(' Expr ')'      {$$ = $2;}
 
 LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1)); printf("LValue\n");}
 
@@ -188,6 +192,7 @@ Constant  : T_IntConstant {$$ = new IntConstant(@1, $1);}
           | T_Null {$$ = new NullConstant(@1);}
 
 Call      : T_Identifier '(' Actuals ')' {$$ = new Call(@1, NULL, new Identifier(@1, $1), $3);}
+          | AtomicExpr '.' T_Identifier '(' Actuals ')' {$$ = new Call(@1, $1, new Identifier(@3, $3), $5);}
 
 Actuals   :    ActualList           { $$ = $1; }
           |    /* empty */          { $$ = new List<Expr*>; }

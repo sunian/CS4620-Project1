@@ -17,8 +17,6 @@ Terminals unused in grammar
    T_New
    T_NewArray
    T_Print
-   T_ReadInteger
-   T_ReadLine
 
 
 Grammar
@@ -70,35 +68,41 @@ Grammar
    30     | T_Return Expr ';'
 
    31 Expr: LValue '=' Expr
-   32     | Constant
-   33     | LValue
-   34     | T_This
-   35     | Call
-   36     | '(' Expr ')'
+   32     | AtomicExpr
 
-   37 LValue: T_Identifier
+   33 AtomicExpr: '(' Expr ')'
+   34           | T_ReadInteger '(' ')'
+   35           | T_ReadLine '(' ')'
+   36           | Constant
+   37           | LValue
+   38           | T_This
+   39           | Call
 
-   38 Constant: T_IntConstant
-   39         | T_DoubleConstant
-   40         | T_BoolConstant
-   41         | T_StringConstant
-   42         | T_Null
+   40 LValue: T_Identifier
 
-   43 Call: T_Identifier '(' Actuals ')'
+   41 Constant: T_IntConstant
+   42         | T_DoubleConstant
+   43         | T_BoolConstant
+   44         | T_StringConstant
+   45         | T_Null
 
-   44 Actuals: ActualList
-   45        | /* empty */
+   46 Call: T_Identifier '(' Actuals ')'
+   47     | AtomicExpr '.' T_Identifier '(' Actuals ')'
 
-   46 ActualList: ActualList ',' Expr
-   47           | Expr
+   48 Actuals: ActualList
+   49        | /* empty */
+
+   50 ActualList: ActualList ',' Expr
+   51           | Expr
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 15 16 36 43
-')' (41) 15 16 36 43
-',' (44) 19 46
+'(' (40) 15 16 33 34 35 46 47
+')' (41) 15 16 33 34 35 46 47
+',' (44) 19 50
+'.' (46) 47
 ';' (59) 6 27 28 29 30
 '=' (61) 31
 '{' (123) 21 22
@@ -117,9 +121,9 @@ T_NotEqual (267)
 T_Dims (268) 13
 T_And (269)
 T_Or (270)
-T_Null (271) 42
+T_Null (271) 45
 T_Extends (272)
-T_This (273) 34
+T_This (273) 38
 T_Interface (274)
 T_Implements (275)
 T_While (276)
@@ -131,59 +135,61 @@ T_Break (281) 29
 T_New (282)
 T_NewArray (283)
 T_Print (284)
-T_ReadInteger (285)
-T_ReadLine (286)
-T_Identifier (287) 7 12 15 16 37 43
-T_StringConstant (288) 41
-T_IntConstant (289) 38
-T_DoubleConstant (290) 39
-T_BoolConstant (291) 40
+T_ReadInteger (285) 34
+T_ReadLine (286) 35
+T_Identifier (287) 7 12 15 16 40 46 47
+T_StringConstant (288) 44
+T_IntConstant (289) 41
+T_DoubleConstant (290) 42
+T_BoolConstant (291) 43
 
 
 Nonterminals, with rules where they appear
 
-$accept (44)
+$accept (45)
     on left: 0
-Program (45)
+Program (46)
     on left: 1, on right: 0
-DeclList (46)
+DeclList (47)
     on left: 2 3, on right: 1 2
-Decl (47)
+Decl (48)
     on left: 4 5, on right: 2 3
-VarDecl (48)
+VarDecl (49)
     on left: 6, on right: 4 23
-Variable (49)
+Variable (50)
     on left: 7, on right: 6 19 20
-Type (50)
+Type (51)
     on left: 8 9 10 11 12 13, on right: 7 13 15
-FnDecl (51)
+FnDecl (52)
     on left: 14, on right: 5
-FnHeader (52)
+FnHeader (53)
     on left: 15 16, on right: 14
-Formals (53)
+Formals (54)
     on left: 17 18, on right: 15 16
-FormalList (54)
+FormalList (55)
     on left: 19 20, on right: 17 19
-StmtBlock (55)
+StmtBlock (56)
     on left: 21 22, on right: 14
-VarDecls (56)
+VarDecls (57)
     on left: 23 24, on right: 21 22 23
-StmtList (57)
+StmtList (58)
     on left: 25 26, on right: 21 25
-Stmt (58)
+Stmt (59)
     on left: 27 28 29 30, on right: 25 26
-Expr (59)
-    on left: 31 32 33 34 35 36, on right: 27 30 31 36 46 47
-LValue (60)
-    on left: 37, on right: 31 33
-Constant (61)
-    on left: 38 39 40 41 42, on right: 32
-Call (62)
-    on left: 43, on right: 35
-Actuals (63)
-    on left: 44 45, on right: 43
-ActualList (64)
-    on left: 46 47, on right: 44 46
+Expr (60)
+    on left: 31 32, on right: 27 30 31 33 50 51
+AtomicExpr (61)
+    on left: 33 34 35 36 37 38 39, on right: 32 47
+LValue (62)
+    on left: 40, on right: 31 37
+Constant (63)
+    on left: 41 42 43 44 45, on right: 36
+Call (64)
+    on left: 46 47, on right: 39
+Actuals (65)
+    on left: 48 49, on right: 46 47
+ActualList (66)
+    on left: 50 51, on right: 48 50
 
 
 state 0
@@ -437,24 +443,27 @@ state 25
     T_This            shift, and go to state 32
     T_Return          shift, and go to state 33
     T_Break           shift, and go to state 34
-    T_Identifier      shift, and go to state 35
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    ';'               shift, and go to state 40
-    '('               shift, and go to state 41
-    '}'               shift, and go to state 42
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 37
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    ';'               shift, and go to state 42
+    '('               shift, and go to state 43
+    '}'               shift, and go to state 44
 
-    VarDecl   go to state 43
-    Variable  go to state 11
-    Type      go to state 27
-    StmtList  go to state 44
-    Stmt      go to state 45
-    Expr      go to state 46
-    LValue    go to state 47
-    Constant  go to state 48
-    Call      go to state 49
+    VarDecl     go to state 45
+    Variable    go to state 11
+    Type        go to state 27
+    StmtList    go to state 46
+    Stmt        go to state 47
+    Expr        go to state 48
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
 
 
 state 26
@@ -470,14 +479,14 @@ state 27
    13 Type: Type . T_Dims
 
     T_Dims        shift, and go to state 19
-    T_Identifier  shift, and go to state 50
+    T_Identifier  shift, and go to state 53
 
 
 state 28
 
    16 FnHeader: T_Void T_Identifier '(' Formals . ')'
 
-    ')'  shift, and go to state 51
+    ')'  shift, and go to state 54
 
 
 state 29
@@ -485,7 +494,7 @@ state 29
    17 Formals: FormalList .
    19 FormalList: FormalList . ',' Variable
 
-    ','  shift, and go to state 52
+    ','  shift, and go to state 55
 
     $default  reduce using rule 17 (Formals)
 
@@ -494,21 +503,21 @@ state 30
 
    15 FnHeader: Type T_Identifier '(' Formals . ')'
 
-    ')'  shift, and go to state 53
+    ')'  shift, and go to state 56
 
 
 state 31
 
-   42 Constant: T_Null .
+   45 Constant: T_Null .
 
-    $default  reduce using rule 42 (Constant)
+    $default  reduce using rule 45 (Constant)
 
 
 state 32
 
-   34 Expr: T_This .
+   38 AtomicExpr: T_This .
 
-    $default  reduce using rule 34 (Expr)
+    $default  reduce using rule 38 (AtomicExpr)
 
 
 state 33
@@ -517,108 +526,128 @@ state 33
 
     T_Null            shift, and go to state 31
     T_This            shift, and go to state 32
-    T_Identifier      shift, and go to state 54
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    '('               shift, and go to state 41
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    '('               shift, and go to state 43
 
-    Expr      go to state 55
-    LValue    go to state 47
-    Constant  go to state 48
-    Call      go to state 49
+    Expr        go to state 58
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
 
 
 state 34
 
    29 Stmt: T_Break . ';'
 
-    ';'  shift, and go to state 56
+    ';'  shift, and go to state 59
 
 
 state 35
 
-   12 Type: T_Identifier .
-   37 LValue: T_Identifier .
-   43 Call: T_Identifier . '(' Actuals ')'
+   34 AtomicExpr: T_ReadInteger . '(' ')'
 
-    '('  shift, and go to state 57
-
-    ';'       reduce using rule 37 (LValue)
-    '='       reduce using rule 37 (LValue)
-    $default  reduce using rule 12 (Type)
+    '('  shift, and go to state 60
 
 
 state 36
 
-   41 Constant: T_StringConstant .
+   35 AtomicExpr: T_ReadLine . '(' ')'
 
-    $default  reduce using rule 41 (Constant)
+    '('  shift, and go to state 61
 
 
 state 37
 
-   38 Constant: T_IntConstant .
+   12 Type: T_Identifier .
+   40 LValue: T_Identifier .
+   46 Call: T_Identifier . '(' Actuals ')'
 
-    $default  reduce using rule 38 (Constant)
+    '('  shift, and go to state 62
+
+    T_Dims        reduce using rule 12 (Type)
+    T_Identifier  reduce using rule 12 (Type)
+    $default      reduce using rule 40 (LValue)
 
 
 state 38
 
-   39 Constant: T_DoubleConstant .
+   44 Constant: T_StringConstant .
 
-    $default  reduce using rule 39 (Constant)
+    $default  reduce using rule 44 (Constant)
 
 
 state 39
 
-   40 Constant: T_BoolConstant .
+   41 Constant: T_IntConstant .
 
-    $default  reduce using rule 40 (Constant)
+    $default  reduce using rule 41 (Constant)
 
 
 state 40
+
+   42 Constant: T_DoubleConstant .
+
+    $default  reduce using rule 42 (Constant)
+
+
+state 41
+
+   43 Constant: T_BoolConstant .
+
+    $default  reduce using rule 43 (Constant)
+
+
+state 42
 
    28 Stmt: ';' .
 
     $default  reduce using rule 28 (Stmt)
 
 
-state 41
+state 43
 
-   36 Expr: '(' . Expr ')'
+   33 AtomicExpr: '(' . Expr ')'
 
     T_Null            shift, and go to state 31
     T_This            shift, and go to state 32
-    T_Identifier      shift, and go to state 54
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    '('               shift, and go to state 41
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    '('               shift, and go to state 43
 
-    Expr      go to state 58
-    LValue    go to state 47
-    Constant  go to state 48
-    Call      go to state 49
+    Expr        go to state 63
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
 
 
-state 42
+state 44
 
    22 StmtBlock: '{' VarDecls '}' .
 
     $default  reduce using rule 22 (StmtBlock)
 
 
-state 43
+state 45
 
    23 VarDecls: VarDecls VarDecl .
 
     $default  reduce using rule 23 (VarDecls)
 
 
-state 44
+state 46
 
    21 StmtBlock: '{' VarDecls StmtList . '}'
    25 StmtList: StmtList . Stmt
@@ -627,75 +656,88 @@ state 44
     T_This            shift, and go to state 32
     T_Return          shift, and go to state 33
     T_Break           shift, and go to state 34
-    T_Identifier      shift, and go to state 54
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    ';'               shift, and go to state 40
-    '('               shift, and go to state 41
-    '}'               shift, and go to state 59
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    ';'               shift, and go to state 42
+    '('               shift, and go to state 43
+    '}'               shift, and go to state 64
 
-    Stmt      go to state 60
-    Expr      go to state 46
-    LValue    go to state 47
-    Constant  go to state 48
-    Call      go to state 49
+    Stmt        go to state 65
+    Expr        go to state 48
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
 
 
-state 45
+state 47
 
    26 StmtList: Stmt .
 
     $default  reduce using rule 26 (StmtList)
 
 
-state 46
+state 48
 
    27 Stmt: Expr . ';'
 
-    ';'  shift, and go to state 61
-
-
-state 47
-
-   31 Expr: LValue . '=' Expr
-   33     | LValue .
-
-    '='  shift, and go to state 62
-
-    $default  reduce using rule 33 (Expr)
-
-
-state 48
-
-   32 Expr: Constant .
-
-    $default  reduce using rule 32 (Expr)
+    ';'  shift, and go to state 66
 
 
 state 49
 
-   35 Expr: Call .
+   32 Expr: AtomicExpr .
+   47 Call: AtomicExpr . '.' T_Identifier '(' Actuals ')'
 
-    $default  reduce using rule 35 (Expr)
+    '.'  shift, and go to state 67
+
+    $default  reduce using rule 32 (Expr)
 
 
 state 50
+
+   31 Expr: LValue . '=' Expr
+   37 AtomicExpr: LValue .
+
+    '='  shift, and go to state 68
+
+    $default  reduce using rule 37 (AtomicExpr)
+
+
+state 51
+
+   36 AtomicExpr: Constant .
+
+    $default  reduce using rule 36 (AtomicExpr)
+
+
+state 52
+
+   39 AtomicExpr: Call .
+
+    $default  reduce using rule 39 (AtomicExpr)
+
+
+state 53
 
     7 Variable: Type T_Identifier .
 
     $default  reduce using rule 7 (Variable)
 
 
-state 51
+state 54
 
    16 FnHeader: T_Void T_Identifier '(' Formals ')' .
 
     $default  reduce using rule 16 (FnHeader)
 
 
-state 52
+state 55
 
    19 FormalList: FormalList ',' . Variable
 
@@ -705,191 +747,282 @@ state 52
     T_String      shift, and go to state 5
     T_Identifier  shift, and go to state 6
 
-    Variable  go to state 63
+    Variable  go to state 69
     Type      go to state 27
 
 
-state 53
+state 56
 
    15 FnHeader: Type T_Identifier '(' Formals ')' .
 
     $default  reduce using rule 15 (FnHeader)
 
 
-state 54
+state 57
 
-   37 LValue: T_Identifier .
-   43 Call: T_Identifier . '(' Actuals ')'
+   40 LValue: T_Identifier .
+   46 Call: T_Identifier . '(' Actuals ')'
 
-    '('  shift, and go to state 57
+    '('  shift, and go to state 62
 
-    $default  reduce using rule 37 (LValue)
+    $default  reduce using rule 40 (LValue)
 
 
-state 55
+state 58
 
    30 Stmt: T_Return Expr . ';'
 
-    ';'  shift, and go to state 64
+    ';'  shift, and go to state 70
 
 
-state 56
+state 59
 
    29 Stmt: T_Break ';' .
 
     $default  reduce using rule 29 (Stmt)
 
 
-state 57
+state 60
 
-   43 Call: T_Identifier '(' . Actuals ')'
+   34 AtomicExpr: T_ReadInteger '(' . ')'
+
+    ')'  shift, and go to state 71
+
+
+state 61
+
+   35 AtomicExpr: T_ReadLine '(' . ')'
+
+    ')'  shift, and go to state 72
+
+
+state 62
+
+   46 Call: T_Identifier '(' . Actuals ')'
 
     T_Null            shift, and go to state 31
     T_This            shift, and go to state 32
-    T_Identifier      shift, and go to state 54
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    '('               shift, and go to state 41
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    '('               shift, and go to state 43
 
-    $default  reduce using rule 45 (Actuals)
+    $default  reduce using rule 49 (Actuals)
 
-    Expr        go to state 65
-    LValue      go to state 47
-    Constant    go to state 48
-    Call        go to state 49
-    Actuals     go to state 66
-    ActualList  go to state 67
-
-
-state 58
-
-   36 Expr: '(' Expr . ')'
-
-    ')'  shift, and go to state 68
+    Expr        go to state 73
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
+    Actuals     go to state 74
+    ActualList  go to state 75
 
 
-state 59
+state 63
+
+   33 AtomicExpr: '(' Expr . ')'
+
+    ')'  shift, and go to state 76
+
+
+state 64
 
    21 StmtBlock: '{' VarDecls StmtList '}' .
 
     $default  reduce using rule 21 (StmtBlock)
 
 
-state 60
+state 65
 
    25 StmtList: StmtList Stmt .
 
     $default  reduce using rule 25 (StmtList)
 
 
-state 61
+state 66
 
    27 Stmt: Expr ';' .
 
     $default  reduce using rule 27 (Stmt)
 
 
-state 62
+state 67
+
+   47 Call: AtomicExpr '.' . T_Identifier '(' Actuals ')'
+
+    T_Identifier  shift, and go to state 77
+
+
+state 68
 
    31 Expr: LValue '=' . Expr
 
     T_Null            shift, and go to state 31
     T_This            shift, and go to state 32
-    T_Identifier      shift, and go to state 54
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    '('               shift, and go to state 41
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    '('               shift, and go to state 43
 
-    Expr      go to state 69
-    LValue    go to state 47
-    Constant  go to state 48
-    Call      go to state 49
+    Expr        go to state 78
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
 
 
-state 63
+state 69
 
    19 FormalList: FormalList ',' Variable .
 
     $default  reduce using rule 19 (FormalList)
 
 
-state 64
+state 70
 
    30 Stmt: T_Return Expr ';' .
 
     $default  reduce using rule 30 (Stmt)
 
 
-state 65
+state 71
 
-   47 ActualList: Expr .
+   34 AtomicExpr: T_ReadInteger '(' ')' .
 
-    $default  reduce using rule 47 (ActualList)
-
-
-state 66
-
-   43 Call: T_Identifier '(' Actuals . ')'
-
-    ')'  shift, and go to state 70
+    $default  reduce using rule 34 (AtomicExpr)
 
 
-state 67
+state 72
 
-   44 Actuals: ActualList .
-   46 ActualList: ActualList . ',' Expr
+   35 AtomicExpr: T_ReadLine '(' ')' .
 
-    ','  shift, and go to state 71
-
-    $default  reduce using rule 44 (Actuals)
+    $default  reduce using rule 35 (AtomicExpr)
 
 
-state 68
+state 73
 
-   36 Expr: '(' Expr ')' .
+   51 ActualList: Expr .
 
-    $default  reduce using rule 36 (Expr)
+    $default  reduce using rule 51 (ActualList)
 
 
-state 69
+state 74
+
+   46 Call: T_Identifier '(' Actuals . ')'
+
+    ')'  shift, and go to state 79
+
+
+state 75
+
+   48 Actuals: ActualList .
+   50 ActualList: ActualList . ',' Expr
+
+    ','  shift, and go to state 80
+
+    $default  reduce using rule 48 (Actuals)
+
+
+state 76
+
+   33 AtomicExpr: '(' Expr ')' .
+
+    $default  reduce using rule 33 (AtomicExpr)
+
+
+state 77
+
+   47 Call: AtomicExpr '.' T_Identifier . '(' Actuals ')'
+
+    '('  shift, and go to state 81
+
+
+state 78
 
    31 Expr: LValue '=' Expr .
 
     $default  reduce using rule 31 (Expr)
 
 
-state 70
+state 79
 
-   43 Call: T_Identifier '(' Actuals ')' .
+   46 Call: T_Identifier '(' Actuals ')' .
 
-    $default  reduce using rule 43 (Call)
+    $default  reduce using rule 46 (Call)
 
 
-state 71
+state 80
 
-   46 ActualList: ActualList ',' . Expr
+   50 ActualList: ActualList ',' . Expr
 
     T_Null            shift, and go to state 31
     T_This            shift, and go to state 32
-    T_Identifier      shift, and go to state 54
-    T_StringConstant  shift, and go to state 36
-    T_IntConstant     shift, and go to state 37
-    T_DoubleConstant  shift, and go to state 38
-    T_BoolConstant    shift, and go to state 39
-    '('               shift, and go to state 41
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    '('               shift, and go to state 43
 
-    Expr      go to state 72
-    LValue    go to state 47
-    Constant  go to state 48
-    Call      go to state 49
+    Expr        go to state 82
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
 
 
-state 72
+state 81
 
-   46 ActualList: ActualList ',' Expr .
+   47 Call: AtomicExpr '.' T_Identifier '(' . Actuals ')'
 
-    $default  reduce using rule 46 (ActualList)
+    T_Null            shift, and go to state 31
+    T_This            shift, and go to state 32
+    T_ReadInteger     shift, and go to state 35
+    T_ReadLine        shift, and go to state 36
+    T_Identifier      shift, and go to state 57
+    T_StringConstant  shift, and go to state 38
+    T_IntConstant     shift, and go to state 39
+    T_DoubleConstant  shift, and go to state 40
+    T_BoolConstant    shift, and go to state 41
+    '('               shift, and go to state 43
+
+    $default  reduce using rule 49 (Actuals)
+
+    Expr        go to state 73
+    AtomicExpr  go to state 49
+    LValue      go to state 50
+    Constant    go to state 51
+    Call        go to state 52
+    Actuals     go to state 83
+    ActualList  go to state 75
+
+
+state 82
+
+   50 ActualList: ActualList ',' Expr .
+
+    $default  reduce using rule 50 (ActualList)
+
+
+state 83
+
+   47 Call: AtomicExpr '.' T_Identifier '(' Actuals . ')'
+
+    ')'  shift, and go to state 84
+
+
+state 84
+
+   47 Call: AtomicExpr '.' T_Identifier '(' Actuals ')' .
+
+    $default  reduce using rule 47 (Call)

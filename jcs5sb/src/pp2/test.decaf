@@ -1,3 +1,3 @@
 int i(String s){
-	
+	if (0) {if (1) ;} else return;
 }

@@ -94,9 +94,10 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <varList>   Formals FormalList VarDecls
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
-%type <stmt>      StmtBlock Stmt
-%type <expr>      Expr LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr UnaryExpr
+%type <stmt>      StmtBlock Stmt 
+%type <expr>      Expr ExprOrNot LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr UnaryExpr
 %type <exprList>  Actuals ActualList
+
 %%
 /* Rules
  * -----
@@ -167,12 +168,17 @@ StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
           | Stmt     { $$ = new List<Stmt*>;$$->Append($1); }
 ;
 
-Stmt      : Expr ';'                        {$$ = $1;}
-          | ';'                             {$$ = new EmptyExpr();}
-          | T_Break ';'                     {$$ = new BreakStmt(@1);}
-          | T_Return Expr ';'               {$$ = new ReturnStmt(@1, $2);}
-          | T_Print '(' ActualList ')' ';'  {$$ = new PrintStmt($3);}
-          | StmtBlock                       {$$ = $1;}
+Stmt      : ExprOrNot ';'                                         {$$ = $1;}
+          | T_Break ';'                                           {$$ = new BreakStmt(@1);}
+          | T_Return ExprOrNot ';'                                {$$ = new ReturnStmt(@1, $2);}
+          | T_Print '(' ActualList ')' ';'                        {$$ = new PrintStmt($3);}
+          | StmtBlock                                             {$$ = $1;}
+          | T_While '(' Expr ')' Stmt                             {$$ = new WhileStmt($3, $5);}
+          | T_For '(' ExprOrNot ';' Expr ';' ExprOrNot ')' Stmt   {$$ = new ForStmt($3, $5, $7, $9);}
+          | T_If '(' Expr ')' Stmt                                {$$ = new IfStmt($3, $5, new EmptyExpr());} 
+          | T_If '(' Expr ')' Stmt T_Else Stmt                    {$$ = new IfStmt($3, $5, $7);}              
+
+ExprOrNot : Expr {$$ = $1;} | {$$ = new EmptyExpr();}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
           | OrExpr            {$$ = $1;}

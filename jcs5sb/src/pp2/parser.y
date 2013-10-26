@@ -167,10 +167,11 @@ StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
           | Stmt     { $$ = new List<Stmt*>;printf("new StmtList\n");$$->Append($1); }
 ;
 
-Stmt      : Expr ';'              {$$ = $1;printf("ExprStmt\n");}
-          | ';'                   {$$ = new EmptyExpr();}
-          | T_Break ';'           {$$ = new BreakStmt(@1);}
-          | T_Return Expr ';'      {$$ = new ReturnStmt(@1, $2);}
+Stmt      : Expr ';'                        {$$ = $1;printf("ExprStmt\n");}
+          | ';'                             {$$ = new EmptyExpr();}
+          | T_Break ';'                     {$$ = new BreakStmt(@1);}
+          | T_Return Expr ';'               {$$ = new ReturnStmt(@1, $2);}
+          | T_Print '(' ActualList ')' ';'  {$$ = new PrintStmt($3);}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
           | AtomicExpr        {$$ = $1;}

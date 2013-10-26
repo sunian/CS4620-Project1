@@ -49,6 +49,7 @@ void yyerror(const char *msg); // standard error-handling routine
     FnDecl *fDecl;
     Type *type;
     Stmt *stmt;
+    Expr *expr;
     List<Stmt*> *stmtList;
     List<VarDecl*> *varList;
     List<Decl*> *declList;
@@ -92,7 +93,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <varList>   Formals FormalList VarDecls
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
-%type <stmt>      StmtBlock
+%type <stmt>      StmtBlock Stmt
+%type <expr>      Expr LValue Constant Call
 %%
 /* Rules
  * -----
@@ -156,11 +158,32 @@ StmtBlock :    '{' VarDecls StmtList '}'
 ;
 
 VarDecls  : VarDecls VarDecl     { ($$=$1)->Append($2); }
-          | /* empty*/           { $$ = new List<VarDecl*>; }
+          | /* empty*/           { $$ = new List<VarDecl*>; printf("VarDecls\n"); }
 ;
 
-StmtList  : /* empty, add your grammar */  { $$ = new List<Stmt*>; }
+StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
+          | /* empty*/     { $$ = new List<Stmt*>; }
 ;
+
+Stmt      : ';'       {$$ = new EmptyExpr();}
+          | Expr ';'  {$$ = $1;}
+
+Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
+          | Constant          {$$ = $1;}
+          | LValue            {$$ = $1;}
+          | T_This            {$$ = new This(@1);}
+          | Call              {$$ = $1;}
+          | '(' Expr ')'      {$$ = $2;}
+
+LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1)); printf("LValue\n");}
+Constant  : T_IntConstant {$$ = new IntConstant(@1, $1);} 
+          | T_DoubleConstant {$$ = new DoubleConstant(@1, $1);}
+          | T_BoolConstant {$$ = new BoolConstant(@1, $1);}
+          | T_StringConstant {$$ = new StringConstant(@1, $1);}
+          | T_Null {$$ = new NullConstant(@1);}
+
+Call      : T_Identifier '(' {$$ = new Call(@1, NULL, new Identifier(@1, $1), NULL);}
+
 
 %%
 

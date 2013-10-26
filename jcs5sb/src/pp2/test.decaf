@@ -1,5 +1,5 @@
 int i(String s){
-	if (0) {if (1) ;} else return;
+	if (0) {if (1) ;} else return this.a;
 }
 
 interface Colorable {

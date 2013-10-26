@@ -48,12 +48,14 @@ void yyerror(const char *msg); // standard error-handling routine
     VarDecl *var;
     FnDecl *fDecl;
     Type *type;
+    NamedType *namedType;
     Stmt *stmt;
     Expr *expr;
     List<Stmt*> *stmtList;
     List<VarDecl*> *varList;
     List<Decl*> *declList;
     List<Expr*> *exprList;
+    List<NamedType*> *typeList;
 }
 
 
@@ -87,9 +89,10 @@ void yyerror(const char *msg); // standard error-handling routine
  * of the union named "declList" which is of type List<Decl*>.
  * pp2: You'll need to add many of these of your own.
  */
-%type <declList>  DeclList Prototypes PrototypeList
-%type <decl>      Decl /*ClassDecl*/ InterfaceDecl Prototype
+%type <declList>  DeclList Prototypes PrototypeList Fields FieldList
+%type <decl>      Decl ClassDecl InterfaceDecl Prototype Field
 %type <type>      Type 
+%type <namedType> Interface Superclass
 %type <var>       Variable VarDecl
 %type <varList>   Formals FormalList VarDecls
 %type <fDecl>     FnDecl FnHeader
@@ -97,6 +100,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmt>      StmtBlock Stmt 
 %type <expr>      Expr ExprOrNot LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr UnaryExpr
 %type <exprList>  Actuals ActualList
+%type <typeList>  Interfaces InterfaceList
 
 %%
 /* Rules
@@ -122,8 +126,34 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
 
 Decl      :    VarDecl              { $$=$1; }
           |    FnDecl               { $$=$1; }
-          /*|    ClassDecl            {$$ = $1;}*/
+          |    ClassDecl            {$$ = $1;}
           |    InterfaceDecl        {$$ = $1;}
+;
+
+ClassDecl : T_Class T_Identifier Superclass Interfaces '{' Fields '}' 
+            {$$ = new ClassDecl(new Identifier(@2,$2), $3, $4, $6);} ;
+
+Superclass  : T_Extends T_Identifier  {$$ = new NamedType(new Identifier(@2,$2));}
+            | /* empty */ {$$ = NULL;}
+
+Interface   : T_Identifier  {$$ = new NamedType(new Identifier(@1,$1));} ;
+
+Interfaces   :   T_Implements InterfaceList           { $$ = $2; }
+          |    /* empty */          { $$ = new List<NamedType*>; }
+;
+
+InterfaceList:    InterfaceList ',' Interface  { ($$=$1)->Append($3); }
+          |    Interface             { ($$ = new List<NamedType*>)->Append($1); }
+;
+
+Field   : VarDecl {$$ = $1;} | FnDecl {$$ = $1;} ;
+
+Fields   :   FieldList           { $$ = $1; }
+          |    /* empty */          { $$ = new List<Decl*>; }
+;
+
+FieldList :    FieldList Field  { ($$=$1)->Append($2); }
+          |    Field             { ($$ = new List<Decl*>)->Append($1); }
 ;
 
 InterfaceDecl   : T_Interface T_Identifier '{' Prototypes '}' 
@@ -244,7 +274,9 @@ AtomicExpr: '(' Expr ')'                      {$$ = $2;}
           | T_NewArray '(' Expr ',' Type ')'  {$$ = new NewArrayExpr(@1, $3, $5);}
 ;
 
-LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1));} ;
+LValue    : T_Identifier                {$$ = new FieldAccess(NULL, new Identifier(@1, $1));} 
+          | AtomicExpr '.' T_Identifier {$$ = new FieldAccess($1, new Identifier(@3, $3));} 
+;
 
 Constant  : T_IntConstant {$$ = new IntConstant(@1, $1);} 
           | T_DoubleConstant {$$ = new DoubleConstant(@1, $1);}

@@ -128,17 +128,19 @@ typedef union YYSTYPE
     VarDecl *var;
     FnDecl *fDecl;
     Type *type;
+    NamedType *namedType;
     Stmt *stmt;
     Expr *expr;
     List<Stmt*> *stmtList;
     List<VarDecl*> *varList;
     List<Decl*> *declList;
     List<Expr*> *exprList;
+    List<NamedType*> *typeList;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 142 "y.tab.h"
+#line 144 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -48,6 +48,8 @@ void yyerror(const char *msg); // standard error-handling routine
     VarDecl *var;
     FnDecl *fDecl;
     Type *type;
+    Case *aCase;
+    DefaultCase *defaultCase;
     NamedType *namedType;
     Stmt *stmt;
     Expr *expr;
@@ -56,6 +58,7 @@ void yyerror(const char *msg); // standard error-handling routine
     List<Decl*> *declList;
     List<Expr*> *exprList;
     List<NamedType*> *typeList;
+    List<Case*> *caseList;
 }
 
 
@@ -70,6 +73,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_And T_Or T_Null T_Extends T_This T_Interface T_Implements
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_New T_NewArray T_Print T_ReadInteger T_ReadLine
+%token   T_Switch T_Case T_Default
 
 %token   <identifier> T_Identifier
 %token   <stringConstant> T_StringConstant 
@@ -96,11 +100,14 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <var>       Variable VarDecl
 %type <varList>   Formals FormalList VarDecls
 %type <fDecl>     FnDecl FnHeader
-%type <stmtList>  StmtList
-%type <stmt>      StmtBlock Stmt 
+%type <stmtList>  StmtList Stmts
+%type <stmt>      StmtBlock Stmt
+%type <aCase>     Case
+%type <defaultCase>     Default
 %type <expr>      Expr ExprOrNot LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr UnaryExpr
 %type <exprList>  Actuals ActualList
 %type <typeList>  Interfaces InterfaceList
+%type <caseList>  CaseList
 
 %%
 /* Rules
@@ -201,12 +208,14 @@ FormalList:    FormalList ',' Variable
           |    Variable             { ($$ = new List<VarDecl*>)->Append($1); }
 ;
 
-StmtBlock :    '{' VarDecls StmtList '}' { $$ = new StmtBlock($2, $3); }
-          |    '{' VarDecls '}' { $$ = new StmtBlock($2, new List<Stmt*>); }
-;
+StmtBlock :    '{' VarDecls Stmts '}' { $$ = new StmtBlock($2, $3); } ;
 
 VarDecls  : VarDecls VarDecl     { ($$=$1)->Append($2); }
           | /* empty*/           { $$ = new List<VarDecl*>; }
+;
+
+Stmts     : StmtList        {$$ = $1;}
+          | /* empty */     {$$ = new List<Stmt*>;}
 ;
 
 StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
@@ -222,9 +231,21 @@ Stmt      : ExprOrNot ';'                                         {$$ = $1;}
           | T_For '(' ExprOrNot ';' Expr ';' ExprOrNot ')' Stmt   {$$ = new ForStmt($3, $5, $7, $9);}
           | T_If '(' Expr ')' Stmt                                {$$ = new IfStmt($3, $5, NULL);} 
           | T_If '(' Expr ')' Stmt T_Else Stmt                    {$$ = new IfStmt($3, $5, $7);} 
+          | T_Switch '(' Expr ')' '{' CaseList Default '}'        {$$ = new SwitchStmt($3, $6, $7);}
 ;
 
 ExprOrNot : Expr {$$ = $1;} | {$$ = new EmptyExpr();} ;
+
+Case      : T_Case T_IntConstant ':' Stmts        {$$ = new Case(new IntConstant(@2, $2), $4);}
+;
+
+CaseList  : CaseList Case           { ($$ = $1)->Append($2);}
+          | Case                    { ($$ = new List<Case*>)->Append($1);}
+;
+
+Default   : T_Default ':' Stmts     {$$ = new DefaultCase($3);}
+          | /* empty */             {$$ = NULL;}
+;
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
           | OrExpr            {$$ = $1;}

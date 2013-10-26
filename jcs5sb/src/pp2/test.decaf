@@ -1,5 +1,9 @@
 int i(String s){
-	if (0) {if (1) ;} else return this.a;
+	switch (s) {
+		case 1:
+		case 2: break; break;
+		default:
+	}
 }
 
 interface Colorable {

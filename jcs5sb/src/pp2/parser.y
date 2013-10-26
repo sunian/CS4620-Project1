@@ -95,7 +95,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
 %type <stmt>      StmtBlock Stmt
-%type <expr>      Expr LValue Constant Call AtomicExpr
+%type <expr>      Expr LValue Constant Call AtomicExpr AddExpr MultExpr OrExpr AndExpr RelationalExpr
 %type <exprList>  Actuals ActualList
 %%
 /* Rules
@@ -160,31 +160,53 @@ StmtBlock :    '{' VarDecls StmtList '}' { $$ = new StmtBlock($2, $3); }
 ;
 
 VarDecls  : VarDecls VarDecl     { ($$=$1)->Append($2); }
-          | /* empty*/           { $$ = new List<VarDecl*>; printf("VarDecls\n"); }
+          | /* empty*/           { $$ = new List<VarDecl*>; }
 ;
 
 StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
-          | Stmt     { $$ = new List<Stmt*>;printf("new StmtList\n");$$->Append($1); }
+          | Stmt     { $$ = new List<Stmt*>;$$->Append($1); }
 ;
 
-Stmt      : Expr ';'                        {$$ = $1;printf("ExprStmt\n");}
+Stmt      : Expr ';'                        {$$ = $1;}
           | ';'                             {$$ = new EmptyExpr();}
           | T_Break ';'                     {$$ = new BreakStmt(@1);}
           | T_Return Expr ';'               {$$ = new ReturnStmt(@1, $2);}
           | T_Print '(' ActualList ')' ';'  {$$ = new PrintStmt($3);}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
-          | AtomicExpr        {$$ = $1;}
+          | OrExpr            {$$ = $1;}
+          
+OrExpr    : AndExpr                   {$$ = $1;}
+          | OrExpr T_Or AndExpr       {$$ = new LogicalExpr($1, new Operator(@2, "||"), $3);}
+
+AndExpr   : RelationalExpr                {$$ = $1;}
+          | AndExpr T_And RelationalExpr  {$$ = new LogicalExpr($1, new Operator(@2, "&&"), $3);}
+
+AddExpr   : MultExpr                  {$$ = $1;}
+          | AddExpr '+' MultExpr      {$$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3);}
+          | AddExpr '-' MultExpr      {$$ = new ArithmeticExpr($1, new Operator(@2, "-"), $3);}
+
+MultExpr  : AtomicExpr                {$$ = $1;}
+          | MultExpr '*' AtomicExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
+          | MultExpr '/' AtomicExpr   {$$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
+
+RelationalExpr  : AddExpr {$$ = $1;}
+                | AddExpr T_Equal AddExpr          {$$ = new EqualityExpr($1, new Operator(@2, "=="), $3);}
+                | AddExpr T_NotEqual AddExpr       {$$ = new EqualityExpr($1, new Operator(@2, "!="), $3);}
+                | AddExpr T_LessEqual AddExpr      {$$ = new RelationalExpr($1, new Operator(@2, "<="), $3);}
+                | AddExpr T_GreaterEqual AddExpr   {$$ = new RelationalExpr($1, new Operator(@2, ">="), $3);}
+                | AddExpr '<' AddExpr              {$$ = new RelationalExpr($1, new Operator(@2, "<"), $3);}
+                | AddExpr '>' AddExpr              {$$ = new RelationalExpr($1, new Operator(@2, ">"), $3);}
 
 AtomicExpr: '(' Expr ')'          {$$ = $2;}
           | T_ReadInteger '(' ')' {$$ = new ReadIntegerExpr(@1);}
           | T_ReadLine '(' ')' {$$ = new ReadLineExpr(@1);}
-          | Constant          {$$ = $1;printf("Constant expr\n");}
+          | Constant          {$$ = $1;}
           | LValue            {$$ = $1;}
           | T_This            {$$ = new This(@1);}
           | Call              {$$ = $1;}
 
-LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1)); printf("LValue\n");}
+LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1));}
 
 Constant  : T_IntConstant {$$ = new IntConstant(@1, $1);} 
           | T_DoubleConstant {$$ = new DoubleConstant(@1, $1);}

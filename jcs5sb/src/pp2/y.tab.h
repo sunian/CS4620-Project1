@@ -133,11 +133,12 @@ typedef union YYSTYPE
     List<Stmt*> *stmtList;
     List<VarDecl*> *varList;
     List<Decl*> *declList;
+    List<Expr*> *exprList;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 141 "y.tab.h"
+#line 142 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

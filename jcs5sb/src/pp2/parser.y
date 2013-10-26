@@ -53,6 +53,7 @@ void yyerror(const char *msg); // standard error-handling routine
     List<Stmt*> *stmtList;
     List<VarDecl*> *varList;
     List<Decl*> *declList;
+    List<Expr*> *exprList;
 }
 
 
@@ -93,8 +94,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <varList>   Formals FormalList VarDecls
 %type <fDecl>     FnDecl FnHeader
 %type <stmtList>  StmtList
-%type <stmt>      StmtBlock Stmt ReturnStmt
+%type <stmt>      StmtBlock Stmt
 %type <expr>      Expr LValue Constant Call
+%type <exprList>  Actuals ActualList
 %%
 /* Rules
  * -----
@@ -153,8 +155,8 @@ FormalList:    FormalList ',' Variable
           |    Variable             { ($$ = new List<VarDecl*>)->Append($1); }
 ;
 
-StmtBlock :    '{' VarDecls StmtList '}' 
-                                    { $$ = new StmtBlock($2, $3); }
+StmtBlock :    '{' VarDecls StmtList '}' { $$ = new StmtBlock($2, $3); }
+          |    '{' VarDecls '}' { $$ = new StmtBlock($2, new List<Stmt*>); }
 ;
 
 VarDecls  : VarDecls VarDecl     { ($$=$1)->Append($2); }
@@ -162,32 +164,37 @@ VarDecls  : VarDecls VarDecl     { ($$=$1)->Append($2); }
 ;
 
 StmtList  : StmtList Stmt  { ($$=$1)->Append($2); }
-          | /* empty*/     { $$ = new List<Stmt*>; }
+          | Stmt     { $$ = new List<Stmt*>;printf("new StmtList\n");$$->Append($1); }
 ;
 
-Stmt      : ';'           {$$ = new EmptyExpr();}
-          | Expr ';'      {$$ = $1;}
-          | T_Break ';'   {$$ = new BreakStmt(@1);}
-          | ReturnStmt    {$$ = $1;}
-
-ReturnStmt: T_Return Expr ';' {$$ = new ReturnStmt(@1, $2);}
-          | T_Return ';'      {$$ = new ReturnStmt(@1, new EmptyExpr());}
+Stmt      : Expr ';'              {$$ = $1;printf("ExprStmt\n");}
+          | ';'                   {$$ = new EmptyExpr();}
+          | T_Break ';'           {$$ = new BreakStmt(@1);}
+          | T_Return Expr ';'      {$$ = new ReturnStmt(@1, $2);}
 
 Expr      : LValue '=' Expr   {$$ = new AssignExpr($1, new Operator(@2, "="), $3);}
-          | Constant          {$$ = $1;}
+          | Constant          {$$ = $1;printf("Constant expr\n");}
           | LValue            {$$ = $1;}
           | T_This            {$$ = new This(@1);}
           | Call              {$$ = $1;}
           | '(' Expr ')'      {$$ = $2;}
 
 LValue    : T_Identifier {$$ = new FieldAccess(NULL, new Identifier(@1, $1)); printf("LValue\n");}
+
 Constant  : T_IntConstant {$$ = new IntConstant(@1, $1);} 
           | T_DoubleConstant {$$ = new DoubleConstant(@1, $1);}
           | T_BoolConstant {$$ = new BoolConstant(@1, $1);}
           | T_StringConstant {$$ = new StringConstant(@1, $1);}
           | T_Null {$$ = new NullConstant(@1);}
 
-Call      : T_Identifier '(' {$$ = new Call(@1, NULL, new Identifier(@1, $1), NULL);}
+Call      : T_Identifier '(' Actuals ')' {$$ = new Call(@1, NULL, new Identifier(@1, $1), $3);}
+
+Actuals   :    ActualList           { $$ = $1; }
+          |    /* empty */          { $$ = new List<Expr*>; }
+
+ActualList:    ActualList ',' Expr  
+                                    { ($$=$1)->Append($3); }
+          |    Expr             { ($$ = new List<Expr*>)->Append($1); }
 
 
 %%

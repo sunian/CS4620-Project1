@@ -140,6 +140,7 @@ void FnDecl::doPass(int pass, Node* parentScope) {
                 if (returnType->sameTypeAs(inherited->returnType) && 
                     formals->NumElements() == inherited->formals->NumElements()) {
                     for (int i = 0; i < formals->NumElements(); i++) {
+                        // printf("%s %s\n", formals->Nth(i)->getType()->GetPrintNameForNode(), inherited->formals->Nth(i)->getType()->GetPrintNameForNode());
                         if (!formals->Nth(i)->getType()->sameTypeAs(inherited->formals->Nth(i)->getType())) {
                             ReportError::OverrideMismatch(this);
                             break;

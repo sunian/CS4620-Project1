@@ -28,7 +28,7 @@ class Type : public Node
     
     const char *GetPrintNameForNode() { return "Type"; }
     void PrintChildren(int indentLevel);
-    virtual bool sameTypeAs(Type *type) {return this == type || type->sameTypeAs(this); }
+    virtual bool sameTypeAs(Type *type) {return type->nodeIsOfType("Type") && 0 == strcmp(typeName, type->typeName); }
 };
 
 class NamedType : public Type 

@@ -1,0 +1,12 @@
+int i(String s){
+	switch (s) {
+		case 1:
+		case 2: break; break;
+		default:
+	}
+}
+
+interface Colorable {
+   Color GetColor();
+   void SetColor(Color c);
+}

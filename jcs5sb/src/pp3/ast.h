@@ -28,7 +28,7 @@
 #include "location.h"
 #include "errors.h"
 #include <unordered_map>
-#include <string>
+#include <string.h>
 using namespace std;
 
 class Decl;
@@ -47,7 +47,7 @@ class Node
     yyltype *GetLocation()   { return location; }
     void SetParent(Node *p)  { parent = p; }
     Node *GetParent()        { return parent; }
-    virtual void checkScope(Node* parentScope) {}
+    virtual void doPass(int pass, Node* parentScope) {}
     Decl *searchScope(string name) { if (scope[name] != NULL) 
 					return scope[name]; 
 				     else if (parent != NULL) 
@@ -61,6 +61,7 @@ class Node
     // subclasses should override PrintChildren() instead
     void Print(int indentLevel, const char *label = NULL); 
     virtual void PrintChildren(int indentLevel)  {}
+    bool nodeIsOfType(const char *name) {return 0 == strcmp(name, GetPrintNameForNode()); }
 };
    
 

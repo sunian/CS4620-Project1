@@ -5,10 +5,9 @@
 
 %{
 
-#define TYPE_VARIABLE 1
-#define TYPE_FUNCTION 2
-#define TYPE_CLASS 3
-#define TYPE_INTERFACE 4
+#define PASS_DeclConflict 1
+#define PASS_OverrideMismatch 2
+#define PASS_IdentifierNotDeclared 3
 
 #include "scanner.h" // for yylex
 #include "parser.h"
@@ -118,7 +117,8 @@ Program   :    DeclList            {
                                       // if no errors, advance to next phase
                                        if (ReportError::NumErrors() == 0) 
                                           //program->Print(0);
-                                          program->checkScope(NULL);
+                                          program->doPass(PASS_DeclConflict, NULL);
+                                          program->doPass(PASS_OverrideMismatch, NULL);
                                     }
           ;
 

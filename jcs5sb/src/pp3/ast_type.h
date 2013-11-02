@@ -11,7 +11,8 @@
 
 #include "ast.h"
 #include "list.h"
-
+#include <string.h>
+using namespace std;
 
 class Type : public Node 
 {
@@ -27,6 +28,7 @@ class Type : public Node
     
     const char *GetPrintNameForNode() { return "Type"; }
     void PrintChildren(int indentLevel);
+    virtual bool sameTypeAs(Type *type) {return this == type || type->sameTypeAs(this); }
 };
 
 class NamedType : public Type 
@@ -39,6 +41,8 @@ class NamedType : public Type
     
     const char *GetPrintNameForNode() { return "NamedType"; }
     void PrintChildren(int indentLevel);
+    char *getName() { return id->getName(); }
+    bool sameTypeAs(Type *type) {return type->nodeIsOfType("NamedType") && 0 == strcmp(getName(), ((NamedType*)type)->getName()); }
 };
 
 class ArrayType : public Type 
@@ -51,6 +55,7 @@ class ArrayType : public Type
     
     const char *GetPrintNameForNode() { return "ArrayType"; }
     void PrintChildren(int indentLevel);
+    bool sameTypeAs(Type *type) {return type->nodeIsOfType("ArrayType") && elemType->sameTypeAs(((ArrayType*)type)->elemType); }
 };
 
  

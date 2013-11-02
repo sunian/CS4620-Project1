@@ -11,6 +11,8 @@
 
 #include "ast.h"
 #include "list.h"
+#include <string.h>
+using namespace std;
 
 class Type;
 class NamedType;
@@ -24,7 +26,7 @@ class Decl : public Node
   
   public:
     Decl(Identifier *name);
-    void checkScope(Node* parentScope);
+    void doPass(int pass, Node* parentScope);
     char *getName() { return id->getName(); }
 };
 
@@ -37,31 +39,7 @@ class VarDecl : public Decl
     VarDecl(Identifier *name, Type *type);
     const char *GetPrintNameForNode() { return "VarDecl"; }
     void PrintChildren(int indentLevel);
-};
-
-class ClassDecl : public Decl 
-{
-  protected:
-    List<Decl*> *members;
-    NamedType *extends;
-    List<NamedType*> *implements;
-
-  public:
-    ClassDecl(Identifier *name, NamedType *extends, 
-              List<NamedType*> *implements, List<Decl*> *members);
-    const char *GetPrintNameForNode() { return "ClassDecl"; }
-    void PrintChildren(int indentLevel);
-};
-
-class InterfaceDecl : public Decl 
-{
-  protected:
-    List<Decl*> *members;
-    
-  public:
-    InterfaceDecl(Identifier *name, List<Decl*> *members);
-    const char *GetPrintNameForNode() { return "InterfaceDecl"; }
-    void PrintChildren(int indentLevel);
+    Type *getType() {return type;}
 };
 
 class FnDecl : public Decl 
@@ -76,7 +54,38 @@ class FnDecl : public Decl
     void SetFunctionBody(Stmt *b);
     const char *GetPrintNameForNode() { return "FnDecl"; }
     void PrintChildren(int indentLevel);
-    void checkScope(Node* parentScope);
+    void doPass(int pass, Node* parentScope);
 };
+
+class InterfaceDecl : public Decl 
+{
+  protected:
+    List<Decl*> *members;
+    
+  public:
+    InterfaceDecl(Identifier *name, List<Decl*> *members);
+    const char *GetPrintNameForNode() { return "InterfaceDecl"; }
+    void PrintChildren(int indentLevel);
+    void doPass(int pass, Node* parentScope);
+};
+
+class ClassDecl : public Decl 
+{
+  protected:
+    List<Decl*> *members;
+    NamedType *extends;
+    List<NamedType*> *implements;
+
+  public:
+    ClassDecl(Identifier *name, NamedType *extends, 
+              List<NamedType*> *implements, List<Decl*> *members);
+    const char *GetPrintNameForNode() { return "ClassDecl"; }
+    void PrintChildren(int indentLevel);
+    void doPass(int pass, Node* parentScope);
+    ClassDecl *getSuperClass();
+    List<InterfaceDecl*> *getInterfaces();
+    FnDecl *getOverridenFn(char *name);
+};
+
 
 #endif

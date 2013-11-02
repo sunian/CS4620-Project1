@@ -86,7 +86,7 @@ void ReportError::DeclConflict(Decl *decl, Decl *prevDecl) {
   
 void ReportError::OverrideMismatch(Decl *fnDecl) {
     stringstream s;
-    s << "Method '" << fnDecl << "' must match inherited type signature";
+    s << "Method '" << fnDecl->getName() << "' must match inherited type signature";
     OutputError(fnDecl->GetLocation(), s.str());
 }
 

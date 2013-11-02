@@ -26,7 +26,7 @@ class Program : public Node
      Program(List<Decl*> *declList);
      const char *GetPrintNameForNode() { return "Program"; }
      void PrintChildren(int indentLevel);
-     void checkScope(Node* parentScope);
+     void doPass(int pass, Node* parentScope);
 };
 
 class Stmt : public Node
@@ -46,7 +46,7 @@ class StmtBlock : public Stmt
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
     const char *GetPrintNameForNode() { return "StmtBlock"; }
     void PrintChildren(int indentLevel);
-    void checkScope(Node* parentScope);
+    void doPass(int pass, Node* parentScope);
 };
 
   
@@ -58,6 +58,7 @@ class ConditionalStmt : public Stmt
   
   public:
     ConditionalStmt(Expr *testExpr, Stmt *body);
+    void doPass(int pass, Node* parentScope);
 };
 
 class LoopStmt : public ConditionalStmt 
@@ -95,6 +96,7 @@ class IfStmt : public ConditionalStmt
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
     const char *GetPrintNameForNode() { return "IfStmt"; }
     void PrintChildren(int indentLevel);
+    void doPass(int pass, Node* parentScope);
 };
 
 class BreakStmt : public Stmt 
@@ -139,6 +141,7 @@ class Case : public Node
     Case(IntConstant *v, List<Stmt*> *stmts);
     const char *GetPrintNameForNode() { return value ? "Case" :"Default"; }
     void PrintChildren(int indentLevel);
+    void doPass(int pass, Node* parentScope);
 };
 
 class SwitchStmt : public Stmt
@@ -151,6 +154,7 @@ class SwitchStmt : public Stmt
     SwitchStmt(Expr *e, List<Case*> *cases);
     const char *GetPrintNameForNode() { return "SwitchStmt"; }
     void PrintChildren(int indentLevel);
+    void doPass(int pass, Node* parentScope);
 };
 
 #endif

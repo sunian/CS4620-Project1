@@ -2,19 +2,43 @@
 int i(String s){
 	int var;
 	String i;
+	if (arg) {
+	int var;
+	} else {
+	String i;String i;
+	}
+	for (i = 0; i < 2; i++){
+		int b;
+		return;
+	}
+	if (i == var) {
+		
+	}
 	switch (s) {
-		case 1: {
-			int i;
-			String i;
-		}
+		case 1: {int b;}
 		case 2: break; break;
 		default:
 	}
 }
 
-int Colorable;
+class Derived extends Base implements Colorable {
+    string field2;
+    int Method1(int a, double b) {}
+    int Method2(int[] aa, Base c) {}
+    void Method3(bool a) {}
+    void GetColor(int s) {}
+}
+
+class Base {
+    string field2;
+    int Method1(int aa, double b) {}
+    int Method2(int[] a, Base c) {}
+    void Method3(bool a) {}
+}
+
+//int Colorable;
 
 interface Colorable {
-   Color GetColor();
+   Color GetColor(int d);
    void SetColor(Color c);
 }

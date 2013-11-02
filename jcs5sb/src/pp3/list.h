@@ -80,9 +80,11 @@ template<class Element> class List {
         { for (int i = 0; i < NumElements(); i++)
              Nth(i)->Print(indentLevel, label); }
 
-    void CheckAllScopes(Node* parentScope)
-        { for (int i = 0; i < NumElements(); i++) {
-             Nth(i)->checkScope(parentScope); 
+    void PassAll(int pass, Node* parentScope)
+        { 
+//	printf("%d\n", NumElements());
+	for (int i = 0; i < NumElements(); i++) {
+             Nth(i)->doPass(pass, parentScope); 
 //             printf("%s\n", Nth(i)->GetPrintNameForNode()); 
 		}
 	}

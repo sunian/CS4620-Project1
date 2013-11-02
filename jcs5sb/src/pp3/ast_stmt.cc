@@ -18,8 +18,8 @@ void Program::PrintChildren(int indentLevel) {
     printf("\n");
 }
 
-void Program::checkScope(Node* parentScope) {
-    decls->CheckAllScopes(this);
+void Program::doPass(int pass, Node* parentScope) {
+    decls->PassAll(pass, this);
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
@@ -33,15 +33,19 @@ void StmtBlock::PrintChildren(int indentLevel) {
     stmts->PrintAll(indentLevel+1);
 }
 
-void StmtBlock::checkScope(Node* parentScope) {
-    decls->CheckAllScopes(this);
-    stmts->CheckAllScopes(this);
+void StmtBlock::doPass(int pass, Node* parentScope) {
+    if (pass == 1) decls->PassAll(pass, this);
+    stmts->PassAll(pass, this);
 }
 
 ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) { 
     Assert(t != NULL && b != NULL);
     (test=t)->SetParent(this); 
     (body=b)->SetParent(this);
+}
+
+void ConditionalStmt::doPass(int pass, Node* parentScope) {
+    body->doPass(pass, this);
 }
 
 ForStmt::ForStmt(Expr *i, Expr *t, Expr *s, Stmt *b): LoopStmt(t, b) { 
@@ -74,6 +78,10 @@ void IfStmt::PrintChildren(int indentLevel) {
     if (elseBody) elseBody->Print(indentLevel+1, "(else) ");
 }
 
+void IfStmt::doPass(int pass, Node* parentScope) {
+    ConditionalStmt::doPass(pass, parentScope);
+    if (elseBody) elseBody->doPass(pass, this);
+}
 
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) { 
     Assert(e != NULL);
@@ -105,6 +113,10 @@ void Case::PrintChildren(int indentLevel) {
     stmts->PrintAll(indentLevel+1);
 }
 
+void Case::doPass(int pass, Node* parentScope) {
+    stmts->PassAll(pass, this);
+}
+
 SwitchStmt::SwitchStmt(Expr *e, List<Case*> *c) {
     Assert(e != NULL && c != NULL);
     (expr=e)->SetParent(this);
@@ -116,4 +128,6 @@ void SwitchStmt::PrintChildren(int indentLevel) {
     cases->PrintAll(indentLevel+1);
 }
 
-
+void SwitchStmt::doPass(int pass, Node* parentScope) {
+    cases->PassAll(pass, this);
+}

@@ -79,7 +79,14 @@ template<class Element> class List {
     void PrintAll(int indentLevel, const char *label = NULL)
         { for (int i = 0; i < NumElements(); i++)
              Nth(i)->Print(indentLevel, label); }
-             
+
+    void CheckAllScopes(Node* parentScope)
+        { for (int i = 0; i < NumElements(); i++) {
+             Nth(i)->checkScope(parentScope); 
+//             printf("%s\n", Nth(i)->GetPrintNameForNode()); 
+		}
+	}
+	             
 
 };
 

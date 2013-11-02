@@ -24,6 +24,8 @@ class Decl : public Node
   
   public:
     Decl(Identifier *name);
+    void checkScope(Node* parentScope);
+    char *getName() { return id->getName(); }
 };
 
 class VarDecl : public Decl 
@@ -74,6 +76,7 @@ class FnDecl : public Decl
     void SetFunctionBody(Stmt *b);
     const char *GetPrintNameForNode() { return "FnDecl"; }
     void PrintChildren(int indentLevel);
+    void checkScope(Node* parentScope);
 };
 
 #endif

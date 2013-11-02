@@ -18,6 +18,10 @@ void Program::PrintChildren(int indentLevel) {
     printf("\n");
 }
 
+void Program::checkScope(Node* parentScope) {
+    decls->CheckAllScopes(this);
+}
+
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
     Assert(d != NULL && s != NULL);
     (decls=d)->SetParentAll(this);
@@ -27,6 +31,11 @@ StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
 void StmtBlock::PrintChildren(int indentLevel) {
     decls->PrintAll(indentLevel+1);
     stmts->PrintAll(indentLevel+1);
+}
+
+void StmtBlock::checkScope(Node* parentScope) {
+    decls->CheckAllScopes(this);
+    stmts->CheckAllScopes(this);
 }
 
 ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) { 

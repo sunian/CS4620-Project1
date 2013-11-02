@@ -5,11 +5,21 @@
 
 %{
 
+#define TYPE_VARIABLE 1
+#define TYPE_FUNCTION 2
+#define TYPE_CLASS 3
+#define TYPE_INTERFACE 4
+
 #include "scanner.h" // for yylex
 #include "parser.h"
 #include "errors.h"
+#include <unordered_map>
+#include <vector>
+using namespace std;
 
 void yyerror(const char *msg); // standard error-handling routine
+
+//vector <unordered_map <string, Node*>> scopes;
 
 %}
 
@@ -106,8 +116,9 @@ Program   :    DeclList            {
                                       @1; 
                                       Program *program = new Program($1);
                                       // if no errors, advance to next phase
-                                      if (ReportError::NumErrors() == 0) 
-                                          program->Print(0);
+                                       if (ReportError::NumErrors() == 0) 
+                                          //program->Print(0);
+                                          program->checkScope(NULL);
                                     }
           ;
 
@@ -122,7 +133,7 @@ Decl      :    ClassDecl
           |    IntfDecl 
           ;
 
-VarDecl   :    Variable ';' 
+VarDecl   :    Variable ';'         {  }
           ;
  
 Variable  :    Type T_Identifier    { $$ = new VarDecl(new Identifier(@2, $2), $1); }

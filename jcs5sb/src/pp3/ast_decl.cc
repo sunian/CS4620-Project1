@@ -12,6 +12,14 @@ Decl::Decl(Identifier *n) : Node(*n->GetLocation()) {
     (id=n)->SetParent(this); 
 }
 
+void Decl::checkScope(Node* parentScope) {
+    // printf("checking Decl %s\n", this->GetPrintNameForNode());
+    if (parentScope->scope[id->getName()] != NULL) {
+        ReportError::DeclConflict(this, parentScope->scope[id->getName()]);
+    } else {
+        parentScope->scope[id->getName()] = this;
+    }
+}
 
 VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
     Assert(n != NULL && t != NULL);
@@ -68,4 +76,10 @@ void FnDecl::PrintChildren(int indentLevel) {
     if (body) body->Print(indentLevel+1, "(body) ");
 }
 
-
+void FnDecl::checkScope(Node* parentScope) {
+    Decl::checkScope(parentScope);
+    // printf("checking FnDecl\n");
+    formals->CheckAllScopes(body);
+    body->checkScope(body);
+    // printf("%s\n", body->GetPrintNameForNode());
+}

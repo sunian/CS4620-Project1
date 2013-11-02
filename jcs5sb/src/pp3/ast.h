@@ -26,6 +26,12 @@
 
 #include <stdlib.h>   // for NULL
 #include "location.h"
+#include "errors.h"
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+class Decl;
 
 class Node 
 {
@@ -34,12 +40,20 @@ class Node
     Node *parent;
 
   public:
+    unordered_map <string, Decl*> scope;
     Node(yyltype loc);
     Node();
     
     yyltype *GetLocation()   { return location; }
     void SetParent(Node *p)  { parent = p; }
     Node *GetParent()        { return parent; }
+    virtual void checkScope(Node* parentScope) {}
+    Decl *searchScope(string name) { if (scope[name] != NULL) 
+					return scope[name]; 
+				     else if (parent != NULL) 
+					return parent->searchScope(name);
+				     else
+					return NULL; }
 
     virtual const char *GetPrintNameForNode() = 0;
     
@@ -59,6 +73,7 @@ class Identifier : public Node
     Identifier(yyltype loc, const char *name);
     const char *GetPrintNameForNode()   { return "Identifier"; }
     void PrintChildren(int indentLevel);
+    char *getName() { return name; }
 };
 
 

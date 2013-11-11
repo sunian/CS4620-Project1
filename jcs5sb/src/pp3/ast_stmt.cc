@@ -34,7 +34,7 @@ void StmtBlock::PrintChildren(int indentLevel) {
 }
 
 void StmtBlock::doPass(int pass, Node* parentScope) {
-    if (pass == 1) decls->PassAll(pass, this);
+    if (pass == 1 || pass == 3) decls->PassAll(pass, this);
     stmts->PassAll(pass, this);
 }
 

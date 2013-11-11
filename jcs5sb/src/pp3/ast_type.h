@@ -28,6 +28,7 @@ class Type : public Node
     
     const char *GetPrintNameForNode() { return "Type"; }
     void PrintChildren(int indentLevel);
+    char *getName() { return typeName; }
     virtual bool sameTypeAs(Type *type) {return type->nodeIsOfType("Type") && 0 == strcmp(typeName, type->typeName); }
 };
 
@@ -42,6 +43,7 @@ class NamedType : public Type
     const char *GetPrintNameForNode() { return "NamedType"; }
     void PrintChildren(int indentLevel);
     char *getName() { return id->getName(); }
+    Identifier *getIdent() {return id;}
     bool sameTypeAs(Type *type) {return type->nodeIsOfType("NamedType") && 0 == strcmp(getName(), ((NamedType*)type)->getName()); }
 };
 
@@ -55,6 +57,7 @@ class ArrayType : public Type
     
     const char *GetPrintNameForNode() { return "ArrayType"; }
     void PrintChildren(int indentLevel);
+    Type *getElemType() {return elemType;}
     bool sameTypeAs(Type *type) {return type->nodeIsOfType("ArrayType") && elemType->sameTypeAs(((ArrayType*)type)->elemType); }
 };
 

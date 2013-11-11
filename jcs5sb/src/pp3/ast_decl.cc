@@ -32,6 +32,29 @@ void VarDecl::PrintChildren(int indentLevel) {
    id->Print(indentLevel+1);
 }
 
+void VarDecl::doPass(int pass, Node* parentScope) {
+    Decl::doPass(pass, parentScope);
+    // printf("pass: %d\n", pass);
+    // printf("parent: %s\n", parentScope->GetPrintNameForNode());
+    if (pass == 3) {
+        // printf("%s\n", type->getName());
+        if (type->nodeIsOfType("NamedType")){
+            Decl *typeDecl = searchScope(((NamedType*) type)->getName());
+            if (typeDecl == NULL || !(typeDecl->nodeIsOfType("ClassDecl") || typeDecl->nodeIsOfType("InterfaceDecl"))) {
+                ReportError::IdentifierNotDeclared(((NamedType*) type)->getIdent(), LookingForType);
+            }
+        } else if (type->nodeIsOfType("ArrayType")){
+            Type *elemType = ((ArrayType*) type)->getElemType();
+            if (elemType->nodeIsOfType("NamedType")){
+                Decl *typeDecl = searchScope(((NamedType*) elemType)->getName());
+                if (typeDecl == NULL || !(typeDecl->nodeIsOfType("ClassDecl") || typeDecl->nodeIsOfType("InterfaceDecl"))) {
+                    ReportError::IdentifierNotDeclared(((NamedType*) elemType)->getIdent(), LookingForType);
+                }
+            }
+        }
+    }
+}
+
 ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<Decl*> *m) : Decl(n) {
     // extends can be NULL, impl & mem may be empty lists but cannot be NULL
     Assert(n != NULL && imp != NULL && m != NULL);     
@@ -93,6 +116,21 @@ FnDecl *ClassDecl::getOverridenFn(char *name) {
 
 void ClassDecl::doPass(int pass, Node* parentScope) {
     Decl::doPass(pass, parentScope);
+    if (pass == 3) {
+        if (extends != NULL) {
+            ClassDecl *superClass = getSuperClass();
+            if (superClass == NULL || !(superClass->nodeIsOfType("ClassDecl"))) {
+                ReportError::IdentifierNotDeclared(extends->getIdent(), LookingForClass);
+            }
+        }
+        for (int i = 0; i < implements->NumElements(); i++) {
+            Decl *interface = parent->scope[implements->Nth(i)->getName()];
+            if (interface == NULL || !interface->nodeIsOfType("InterfaceDecl")) {
+                ReportError::IdentifierNotDeclared(implements->Nth(i)->getIdent(), LookingForInterface);
+            }
+        }
+    }
+    
     members->PassAll(pass, this);
 }
 
@@ -153,6 +191,7 @@ void FnDecl::doPass(int pass, Node* parentScope) {
         }
     } else {
         if (body) {
+            // printf("FnDecl pass %d\n", pass);
             formals->PassAll(pass, body);
             body->doPass(pass, body);
         } else {

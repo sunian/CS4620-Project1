@@ -100,7 +100,7 @@ void ReportError::IdentifierNotDeclared(Identifier *ident, reasonT whyNeeded) {
     stringstream s;
     static const char *names[] =  {"type", "class", "interface", "variable", "function"};
     Assert(whyNeeded >= 0 && whyNeeded <= sizeof(names)/sizeof(names[0]));
-    s << "No declaration found for "<< names[whyNeeded] << " '" << ident << "'";
+    s << "No declaration found for "<< names[whyNeeded] << " '" << ident->getName() << "'";
     OutputError(ident->GetLocation(), s.str());
 }
 

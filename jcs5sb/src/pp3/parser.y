@@ -119,6 +119,7 @@ Program   :    DeclList            {
                                           //program->Print(0);
                                           program->doPass(PASS_DeclConflict, NULL);
                                           program->doPass(PASS_OverrideMismatch, NULL);
+                                          program->doPass(PASS_IdentifierNotDeclared, NULL);
                                     }
           ;
 

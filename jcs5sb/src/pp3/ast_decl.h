@@ -27,6 +27,7 @@ class Decl : public Node
   public:
     Decl(Identifier *name);
     void doPass(int pass, Node* parentScope);
+    Identifier *getIdent() {return id;}
     char *getName() { return id->getName(); }
 };
 
@@ -39,6 +40,7 @@ class VarDecl : public Decl
     VarDecl(Identifier *name, Type *type);
     const char *GetPrintNameForNode() { return "VarDecl"; }
     void PrintChildren(int indentLevel);
+    void doPass(int pass, Node* parentScope);
     Type *getType() {return type;}
 };
 

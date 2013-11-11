@@ -1,0 +1,10 @@
+int a;
+
+void main()
+{
+     if (true) {
+        double b;
+        Unknown c;
+     }
+	   
+}

@@ -46,5 +46,11 @@ void FnDecl::SetFunctionBody(Stmt *b) {
     (body=b)->SetParent(this);
 }
 
-
-
+void FnDecl::Emit() {
+     generator->GenLabel(id->getName());
+     BeginFunc* funcHeader = generator->GenBeginFunc();
+     funcHeader->SetFrameSize(4);
+     Location* fortytwo = generator->GenLoadConstant(42);
+     generator->GenBuiltInCall(PrintInt, fortytwo);
+     generator->GenEndFunc();
+}

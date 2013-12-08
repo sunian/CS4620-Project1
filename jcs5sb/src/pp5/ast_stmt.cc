@@ -27,6 +27,10 @@ void Program::Emit() {
      *      which makes for a great use of inheritance and
      *      polymorphism in the node classes.
      */
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Emit();
+    }
+    generator->DoFinalCodeGen();
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {

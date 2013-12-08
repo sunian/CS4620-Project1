@@ -15,6 +15,9 @@
 #include "ast.h"
 #include "list.h"
 #include <iostream>
+#include "codegen.h"
+
+extern CodeGenerator * generator;
 
 
 class Type : public Node 

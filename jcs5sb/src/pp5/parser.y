@@ -5,20 +5,11 @@
 
 %{
 
-#define PASS_DeclConflict 1
-#define PASS_OverrideMismatch 2
-#define PASS_IdentifierNotDeclared 3
-
 #include "scanner.h" // for yylex
 #include "parser.h"
 #include "errors.h"
-#include <unordered_map>
-#include <vector>
-using namespace std;
 
 void yyerror(const char *msg); // standard error-handling routine
-
-//vector <unordered_map <string, Node*>> scopes;
 
 %}
 
@@ -45,8 +36,6 @@ void yyerror(const char *msg); // standard error-handling routine
     Stmt *stmt;
     List<Stmt*> *stmtList;
     LValue *lvalue;
-    Case *aCase;
-    List<Case*> *caseList;
 }
 
 
@@ -65,8 +54,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   <doubleConstant> T_DoubleConstant
 %token   <boolConstant> T_BoolConstant
 
-%token   T_Increm T_Decrem T_Switch T_Case T_Default
-
 
 /* Non-terminal types
  * ------------------
@@ -84,9 +71,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <exprList>  Actuals ExprList
 %type <stmt>      Stmt StmtBlock OptElse
 %type <stmtList>  StmtList
-%type <stmt>      SwitchStmt
-%type <aCase>     Case OptDefault
-%type <caseList>  CaseList
 
   
 /* Precedence and associativity
@@ -101,7 +85,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %nonassoc  '<' '>' T_LessEqual T_GreaterEqual
 %left      '+' '-'
 %left      '*' '/' '%'  
-%nonassoc  T_UnaryMinus '!' T_Increm T_Decrem
+%nonassoc  T_UnaryMinus '!' 
 %nonassoc  '.' '['
 %nonassoc  T_Lower_Than_Else
 %nonassoc  T_Else
@@ -109,15 +93,14 @@ void yyerror(const char *msg); // standard error-handling routine
 %%
 /* Rules
  * -----
-	 
+   
  */
 Program   :    DeclList            { 
                                       @1; 
                                       Program *program = new Program($1);
                                       // if no errors, advance to next phase
-                                       if (ReportError::NumErrors() == 0) 
-                                          program->Print(0);
-                                          program->emit();
+                                      if (ReportError::NumErrors() == 0) 
+                                          program->Emit(); 
                                     }
           ;
 
@@ -132,7 +115,7 @@ Decl      :    ClassDecl
           |    IntfDecl 
           ;
 
-VarDecl   :    Variable ';'         {  }
+VarDecl   :    Variable ';' 
           ;
  
 Variable  :    Type T_Identifier    { $$ = new VarDecl(new Identifier(@2, $2), $1); }
@@ -228,7 +211,6 @@ Stmt      :    OptExpr ';'          { $$ = $1; }
           |    T_Print '(' ExprList ')' ';'  
                                     { $$ = new PrintStmt($3); }
           |    T_Break ';'          { $$ = new BreakStmt(@1); }
-          |    SwitchStmt
           ;
 
 LValue    :    T_Identifier          { $$ = new FieldAccess(NULL, new Identifier(@1, $1)); }
@@ -277,8 +259,6 @@ Expr      :    LValue               { $$ = $1; }
           |    T_NewArray '(' Expr ',' Type ')' 
                                     { $$ = new NewArrayExpr(Join(@1,@6),$3, $5); }
           |    T_This               { $$ = new This(@1); }
-          |    LValue T_Increm      { $$ = new PostfixExpr($1, new Operator(@2, "++")); }
-          |    LValue T_Decrem      { $$ = new PostfixExpr($1, new Operator(@2, "--")); }
           ;
 
 Constant  :    T_IntConstant        { $$ = new IntConstant(@1,$1); }
@@ -299,24 +279,6 @@ ExprList  :    ExprList ',' Expr    { ($$=$1)->Append($3); }
 OptElse   :    T_Else Stmt          { $$ = $2; }
           |    /* empty */   %prec T_Lower_Than_Else 
                                     { $$ = NULL; }
-          ;
-
-SwitchStmt:    T_Switch '(' Expr ')' '{' CaseList OptDefault '}'
-                                    { if ($7) $6->Append($7);
-                                      $$ = new SwitchStmt($3, $6); }
-          ;
-
-CaseList  :    CaseList Case        { ($$=$1)->Append($2); }
-          |    Case                 { ($$ = new List<Case*>)->Append($1); }
-          ;
-
-Case      :    T_Case T_IntConstant ':' StmtList 
-                                    { $$ = new Case(new IntConstant(@2, $2), $4); }
-          ;
-
-OptDefault:    T_Default ':' StmtList   
-                                    { $$ = new Case(NULL, $3); }
-          |    /* empty */          { $$ = NULL; }
           ;
 
 %%

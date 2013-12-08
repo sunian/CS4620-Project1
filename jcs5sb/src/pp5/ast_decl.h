@@ -14,6 +14,9 @@
 
 #include "ast.h"
 #include "list.h"
+#include "codegen.h"
+ 
+extern CodeGenerator * generator;
 
 class Type;
 class NamedType;
@@ -27,6 +30,7 @@ class Decl : public Node
   
   public:
     Decl(Identifier *name);
+    virtual void Emit() {}
     friend std::ostream& operator<<(std::ostream& out, Decl *d) { return out << d->id; }
 };
 
@@ -70,6 +74,7 @@ class FnDecl : public Decl
   public:
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
     void SetFunctionBody(Stmt *b);
+    void Emit();
 };
 
 #endif

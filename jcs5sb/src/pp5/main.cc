@@ -9,6 +9,9 @@
 #include "utility.h"
 #include "errors.h"
 #include "parser.h"
+#include "codegen.h"
+
+CodeGenerator * generator = new CodeGenerator();
 
 
 /* Function: main()

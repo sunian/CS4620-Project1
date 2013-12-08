@@ -16,6 +16,9 @@
 #include "ast.h"
 #include "ast_stmt.h"
 #include "list.h"
+#include "codegen.h"
+ 
+extern CodeGenerator * generator;
 
 class NamedType; // for new
 class Type; // for NewArray

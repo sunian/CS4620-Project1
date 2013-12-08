@@ -15,6 +15,9 @@
 
 #include "list.h"
 #include "ast.h"
+#include "codegen.h"
+
+extern CodeGenerator * generator;
 
 class Decl;
 class VarDecl;

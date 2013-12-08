@@ -1,10 +1,11 @@
-int a;
+class Club {
+   void Meet() { FindTime(); }
+}
 
-void main()
-{
-     if (true) {
-        double b;
-        Unknown c;
-     }
-	   
+void main() {
+   Club tbc;
+   nico = trish + katie;
+   main().glob();
+   cheryl();
+   tbc.Meeting(caroline);
 }

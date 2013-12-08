@@ -117,9 +117,7 @@ Program   :    DeclList            {
                                       // if no errors, advance to next phase
                                        if (ReportError::NumErrors() == 0) 
                                           program->Print(0);
-                                          program->doPass(PASS_DeclConflict, NULL);
-                                          program->doPass(PASS_OverrideMismatch, NULL);
-                                          program->doPass(PASS_IdentifierNotDeclared, NULL);
+                                          program->emit();
                                     }
           ;
 

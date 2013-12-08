@@ -106,8 +106,19 @@ Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     if (base) base->Print(indentLevel+1);
     field->Print(indentLevel+1);
     actuals->PrintAll(indentLevel+1, "(actuals) ");
-  }
- 
+  } 
+
+void Call::doPass(int pass, Node* parentScope) {
+    Expr::doPass(pass, parentScope);
+    if (pass == 3) {
+        if (base == NULL) {
+            Decl *funcDecl = searchScope(field->getName());
+            if (funcDecl == NULL || !(funcDecl->nodeIsOfType("FnDecl"))) {
+                ReportError::IdentifierNotDeclared(field, LookingForFunction);
+            }
+        } 
+    }
+}
 
 NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) { 
   Assert(c != NULL);
@@ -116,6 +127,16 @@ NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) {
 
 void NewExpr::PrintChildren(int indentLevel) {	
     cType->Print(indentLevel+1);
+}
+
+void NewExpr::doPass(int pass, Node* parentScope) {
+    Expr::doPass(pass, parentScope);
+    if (pass == 3) {
+        Decl *typeDecl = searchScope(cType->getName());
+        if (typeDecl == NULL || !(typeDecl->nodeIsOfType("ClassDecl"))) {
+            ReportError::IdentifierNotDeclared(cType->getIdent(), LookingForClass);
+        }
+    }
 }
 
 NewArrayExpr::NewArrayExpr(yyltype loc, Expr *sz, Type *et) : Expr(loc) {
@@ -127,6 +148,18 @@ NewArrayExpr::NewArrayExpr(yyltype loc, Expr *sz, Type *et) : Expr(loc) {
 void NewArrayExpr::PrintChildren(int indentLevel) {
     size->Print(indentLevel+1);
     elemType->Print(indentLevel+1);
+}
+
+void NewArrayExpr::doPass(int pass, Node* parentScope) {
+    Expr::doPass(pass, parentScope);
+    if (pass == 3) {
+        if (elemType->nodeIsOfType("NamedType")){
+            Decl *typeDecl = searchScope(((NamedType*) elemType)->getName());
+            if (typeDecl == NULL || !(typeDecl->nodeIsOfType("ClassDecl"))) {
+                ReportError::IdentifierNotDeclared(((NamedType*) elemType)->getIdent(), LookingForClass);
+            }
+        }
+    }
 }
 
 PostfixExpr::PostfixExpr(LValue *lv, Operator *o) : Expr(Join(lv->GetLocation(), o->GetLocation())) {

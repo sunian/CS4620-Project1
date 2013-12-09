@@ -99,9 +99,16 @@ Program   :    DeclList            {
                                       @1; 
                                       Program *program = new Program($1);
                                       // if no errors, advance to next phase
-                                      if (ReportError::NumErrors() == 0) 
-                                          program->Check(NULL);
+                                      if (ReportError::NumErrors() == 0) {
+                                        program->Check(NULL);
+                                        Decl* main = program->searchScope("main");
+                                        if (main != NULL && main->isOfType("FnDecl")) {
                                           program->Emit(NULL); 
+                                        } else {
+                                          printf("***Linker: function 'main' not defined\n");
+                                        }
+                                      }
+                                          
                                     }
           ;
 

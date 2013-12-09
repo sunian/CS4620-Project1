@@ -1,4 +1,4 @@
-void main() {
+void mainy() {
   int c;
 
   c = test(4, 2) * 7;

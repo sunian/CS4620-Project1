@@ -205,6 +205,7 @@ class Call : public Expr
   public:
     Call(yyltype loc, Expr *base, Identifier *field, List<Expr*> *args);
     const char *GetPrintNameForNode() { return "Call"; }
+    Location* Emit(Node* parent);
 };
 
 class NewExpr : public Expr

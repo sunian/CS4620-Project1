@@ -12,10 +12,13 @@ Decl::Decl(Identifier *n) : Node(*n->GetLocation()) {
     (id=n)->SetParent(this); 
 }
 
-
 VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
     Assert(n != NULL && t != NULL);
     (type=t)->SetParent(this);
+}
+
+void VarDecl::Check(Node* parent) {
+    GetParent()->scope[getName()] = this;
 }
 
 Location* VarDecl::Emit(Node* parent) {
@@ -58,7 +61,19 @@ void FnDecl::SetFunctionBody(Stmt *b) {
     (body=b)->SetParent(this);
 }
 
+void FnDecl::Check(Node* parent) {
+    parent->scope[getName()] = this;
+    for (int i = 0; i < formals->NumElements(); i++) {
+        scope[formals->Nth(i)->getName()] = formals->Nth(i);
+    }
+    body->Check(this);
+}
+
 Location* FnDecl::Emit(Node* parent) {
+    generator->currentFrame = this;
+    for (int i = 0; i < formals->NumElements(); i++) {
+        formals->Nth(i)->memLoc = new Location(fpRelative, 4 * i + 4, formals->Nth(i)->getName());
+    }
     generator->GenLabel(getLabel());
     BeginFunc* funcHeader = generator->GenBeginFunc();
     body->Emit(this);
@@ -69,7 +84,6 @@ Location* FnDecl::Emit(Node* parent) {
 }
 
 const char *FnDecl::getLabel() {
-    generator->currentFrame = this;
     if (GetParent()->isOfType("Program")) {
         if (strcmp(getName(), "main") == 0) {
             return "main";

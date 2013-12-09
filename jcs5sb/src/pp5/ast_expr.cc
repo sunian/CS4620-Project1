@@ -92,7 +92,22 @@ Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     (field=f)->SetParent(this);
     (actuals=a)->SetParentAll(this);
 }
- 
+
+Location* Call::Emit(Node* parent) {
+    if (base == NULL) {
+        FnDecl* fnDecl = (FnDecl*)searchScope(field->getName());
+        if (fnDecl->GetParent()->isOfType("Program")) {
+            for (int i = actuals->NumElements() - 1; i >= 0; i--) {
+                generator->GenPushParam(actuals->Nth(i)->Emit(parent));
+            }
+            Location* returnVal = generator->GenLCall(fnDecl->getLabel(), fnDecl->getReturnType() != Type::voidType);
+            generator->GenPopParams(4 * actuals->NumElements());
+            return returnVal;
+        }
+        
+    }
+    return NULL;
+} 
 
 NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) { 
   Assert(c != NULL);

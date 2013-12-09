@@ -13,6 +13,12 @@ Program::Program(List<Decl*> *d) {
     (decls=d)->SetParentAll(this);
 }
 
+void Program::Check(Node* parent) {
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Check(this);
+    }
+}
+
 Location* Program::Emit(Node* parent) {
     /* pp5: here is where the code generation is kicked off.
      *      The general idea is perform a tree traversal of the
@@ -56,6 +62,15 @@ StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
     (stmts=s)->SetParentAll(this);
 }
 
+void StmtBlock::Check(Node* parent) {
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Check(parent);
+    }
+    for (int i = 0; i < stmts->NumElements(); i++) {
+        stmts->Nth(i)->Check(parent);
+    }
+}
+
 Location* StmtBlock::Emit(Node* parent) {
     for (int i = 0; i < decls->NumElements(); i++) {
         decls->Nth(i)->Emit(parent);
@@ -89,12 +104,16 @@ ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) {
     Assert(e != NULL);
     (expr=e)->SetParent(this);
 }
+
+Location* ReturnStmt::Emit(Node* parent) {
+    generator->GenReturn(expr->Emit(parent));
+    return NULL;
+}
   
 PrintStmt::PrintStmt(List<Expr*> *a) {    
     Assert(a != NULL);
     (args=a)->SetParentAll(this);
 }
-
 
 Location* PrintStmt::Emit(Node* parent) {
     for (int i = 0; i < args->NumElements(); i++) {

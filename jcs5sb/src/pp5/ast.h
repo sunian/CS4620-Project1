@@ -66,6 +66,7 @@ class Node
         return NULL; 
     }
     virtual Location* Emit(Node* parent) {return NULL;}
+    virtual void Check(Node* parent) {}
 };
    
 

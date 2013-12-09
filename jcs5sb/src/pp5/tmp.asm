@@ -15,14 +15,23 @@
 	# _tmp1 = 2
 	  li $t2, 2		# load constant value 2 into $t2
 	  sw $t2, -16($fp)	# spill _tmp1 from $t2 to $fp-16
+	# PushParam _tmp1
+	  subu $sp, $sp, 4	# decrement sp to make space for param
+	  lw $t0, -16($fp)	# fill _tmp1 to $t0 from $fp-16
+	  sw $t0, 4($sp)	# copy param value to stack
 	# _tmp2 = 4
 	  li $t2, 4		# load constant value 4 into $t2
 	  sw $t2, -20($fp)	# spill _tmp2 from $t2 to $fp-20
-	# _tmp3 = _tmp2 + _tmp1
+	# PushParam _tmp2
+	  subu $sp, $sp, 4	# decrement sp to make space for param
 	  lw $t0, -20($fp)	# fill _tmp2 to $t0 from $fp-20
-	  lw $t1, -16($fp)	# fill _tmp1 to $t1 from $fp-16
-	  add $t2, $t0, $t1	
+	  sw $t0, 4($sp)	# copy param value to stack
+	# _tmp3 = LCall _test
+	  jal _test          	# jump to function
+	  move $t2, $v0		# copy function return value from $v0
 	  sw $t2, -24($fp)	# spill _tmp3 from $t2 to $fp-24
+	# PopParams 8
+	  add $sp, $sp, 8	# pop params off stack
 	# _tmp4 = _tmp3 * _tmp0
 	  lw $t0, -24($fp)	# fill _tmp3 to $t0 from $fp-24
 	  lw $t1, -12($fp)	# fill _tmp0 to $t1 from $fp-12
@@ -46,11 +55,24 @@
 	  lw $fp, 0($fp)	# restore saved fp
 	  jr $ra		# return from function
   _test:
-	# BeginFunc 0
+	# BeginFunc 4
 	  subu $sp, $sp, 8	# decrement sp to make space to save ra, fp
 	  sw $fp, 8($sp)	# save fp
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
+	  subu $sp, $sp, 4	# decrement sp to make space for locals/temps
+	# _tmp5 = a + b
+	  lw $t0, 4($fp)	# fill a to $t0 from $fp+4
+	  lw $t1, 8($fp)	# fill b to $t1 from $fp+8
+	  add $t2, $t0, $t1	
+	  sw $t2, -8($fp)	# spill _tmp5 from $t2 to $fp-8
+	# Return _tmp5
+	  lw $t2, -8($fp)	# fill _tmp5 to $t2 from $fp-8
+	  move $v0, $t2		# assign return value into $v0
+	  move $sp, $fp		# pop callee frame off stack
+	  lw $ra, -4($fp)	# restore saved ra
+	  lw $fp, 0($fp)	# restore saved fp
+	  jr $ra		# return from function
 	# EndFunc
 	# (below handles reaching end of fn body with no explicit return)
 	  move $sp, $fp		# pop callee frame off stack

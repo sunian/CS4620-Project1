@@ -40,6 +40,7 @@ class VarDecl : public Decl
     VarDecl(Identifier *name, Type *type);
     const char *GetPrintNameForNode() { return "VarDecl"; }
     Location* Emit(Node* parent);
+    void Check(Node* parent);
     Type *getType() {return type;}
 };
 
@@ -57,7 +58,9 @@ class FnDecl : public Decl
     void SetFunctionBody(Stmt *b);
     const char *GetPrintNameForNode() { return "FnDecl"; }
     Location* Emit(Node* parent);
+    void Check(Node* parent);
     const char *getLabel();
+    Type* getReturnType() {return returnType;}
 };
 
 class InterfaceDecl : public Decl 

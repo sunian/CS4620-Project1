@@ -26,6 +26,7 @@ class Program : public Node
      Program(List<Decl*> *declList);
      const char *GetPrintNameForNode() { return "Program"; }
      Location* Emit(Node* parent);
+     void Check(Node* parent);
 };
 
 class Stmt : public Node
@@ -45,6 +46,7 @@ class StmtBlock : public Stmt
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
     const char *GetPrintNameForNode() { return "StmtBlock"; }
     Location* Emit(Node* parent);
+    void Check(Node* parent);
 };
 
   
@@ -107,6 +109,7 @@ class ReturnStmt : public Stmt
   public:
     ReturnStmt(yyltype loc, Expr *expr);
     const char *GetPrintNameForNode() { return "ReturnStmt"; }
+    Location* Emit(Node* parent);
 };
 
 class PrintStmt : public Stmt

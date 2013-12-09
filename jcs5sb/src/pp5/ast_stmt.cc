@@ -96,3 +96,13 @@ PrintStmt::PrintStmt(List<Expr*> *a) {
 }
 
 
+Location* PrintStmt::Emit(Node* parent) {
+    for (int i = 0; i < args->NumElements(); i++) {
+        if (args->Nth(i)->getType() == Type::intType) {
+            generator->GenBuiltInCall(PrintInt, args->Nth(i)->Emit(parent));
+        }
+        
+    }
+    return NULL;
+}
+

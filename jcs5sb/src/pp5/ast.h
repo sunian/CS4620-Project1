@@ -39,6 +39,7 @@
 using namespace std;
 extern CodeGenerator * generator;
 
+class Decl;
 
 class Node 
 {
@@ -47,7 +48,7 @@ class Node
     Node *parent;
 
   public:
-    unordered_map <string, Location*> scope;
+    unordered_map <string, Decl*> scope;
     Node(yyltype loc);
     Node();
     
@@ -56,7 +57,7 @@ class Node
     Node *GetParent()        { return parent; }
     virtual const char *GetPrintNameForNode() = 0;
     bool isOfType(const char *name) {return 0 == strcmp(name, GetPrintNameForNode()); }
-    Location *searchScope(string name) { 
+    Decl *searchScope(string name) { 
       if (scope[name] != NULL) 
         return scope[name]; 
       else if (parent != NULL) 

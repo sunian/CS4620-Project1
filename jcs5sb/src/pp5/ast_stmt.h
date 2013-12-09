@@ -117,6 +117,7 @@ class PrintStmt : public Stmt
   public:
     PrintStmt(List<Expr*> *arguments);
     const char *GetPrintNameForNode() { return "PrintStmt"; }
+    Location* Emit(Node* parent);
 };
 
 

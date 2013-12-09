@@ -97,6 +97,7 @@ class Operator : public Node
   public:
     Operator(yyltype loc, const char *tok);
     const char *GetPrintNameForNode() { return "Operator"; }
+    char* getOpName() {return tokenString;}
  };
  
 class CompoundExpr : public Expr
@@ -108,6 +109,7 @@ class CompoundExpr : public Expr
   public:
     CompoundExpr(Expr *lhs, Operator *op, Expr *rhs); // for binary
     CompoundExpr(Operator *op, Expr *rhs);             // for unary
+    Location* Emit(Node* parent);
 };
 
 class ArithmeticExpr : public CompoundExpr 
@@ -186,6 +188,7 @@ class FieldAccess : public LValue
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
     const char *GetPrintNameForNode() { return "FieldAccess"; }
     Location* Emit(Node* parent);
+    Type *getType();
 };
 
 /* Like field access, call is used both for qualified base.field()

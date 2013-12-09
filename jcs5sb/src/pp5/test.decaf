@@ -1,7 +1,7 @@
 void main() {
   int c;
 
-  c = 73;
+  c = (4 + 2) * 7;
   Print(c);
 
 }

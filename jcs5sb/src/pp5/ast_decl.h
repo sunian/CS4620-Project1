@@ -25,6 +25,7 @@ class Decl : public Node
     Identifier *id;
   
   public:
+    Location* memLoc;
     Decl(Identifier *name);
     Identifier *getIdent() {return id;}
     const char *getName() { return id->getName(); }

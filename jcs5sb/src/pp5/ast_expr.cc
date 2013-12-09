@@ -49,11 +49,18 @@ CompoundExpr::CompoundExpr(Operator *o, Expr *r)
     (op=o)->SetParent(this);
     (right=r)->SetParent(this);
 }
+
+Location* CompoundExpr::Emit(Node* parent) {
+    if (left != NULL) {
+        return generator->GenBinaryOp(op->getOpName(), left->Emit(parent), right->Emit(parent));
+    }
+    return NULL;
+}
  
 Location* AssignExpr::Emit(Node* parent) {
     // printf("%s\n", parent->GetPrintNameForNode());
     Location* loc = left->Emit(parent);
-    generator->GenStore(loc, right->Emit(parent));
+    generator->GenAssign(loc, right->Emit(parent));
     return loc;
 }
   
@@ -71,7 +78,11 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 }
 
 Location* FieldAccess::Emit(Node* parent) {
-    return searchScope(field->getName());
+    return searchScope(field->getName())->memLoc;
+}
+
+Type *FieldAccess::getType() {
+    return ((VarDecl*)searchScope(field->getName()))->getType();
 }
 
 Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {

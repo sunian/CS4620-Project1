@@ -21,9 +21,9 @@ VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
 Location* VarDecl::Emit(Node* parent) {
     if (parent->isOfType("FnDecl")) {//is local var
         FnDecl* parentFunc = (FnDecl*)parent;
-        Location* localVar = new Location(fpRelative, -4 * (parentFunc->frameSize++) - 8, getName());
-        GetParent()->scope[getName()] = localVar;
-        return localVar;
+        memLoc = new Location(fpRelative, -4 * (parentFunc->frameSize++) - 8, getName());
+        GetParent()->scope[getName()] = this;
+        return memLoc;
     }
     
     return NULL;

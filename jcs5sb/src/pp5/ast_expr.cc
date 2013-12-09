@@ -13,6 +13,10 @@ IntConstant::IntConstant(yyltype loc, int val) : Expr(loc) {
     value = val;
 }
 
+Location* IntConstant::Emit(Node* parent) {
+    return generator->GenLoadConstant(value);
+}
+
 DoubleConstant::DoubleConstant(yyltype loc, double val) : Expr(loc) {
     value = val;
 }
@@ -45,7 +49,13 @@ CompoundExpr::CompoundExpr(Operator *o, Expr *r)
     (op=o)->SetParent(this);
     (right=r)->SetParent(this);
 }
-   
+ 
+Location* AssignExpr::Emit(Node* parent) {
+    // printf("%s\n", parent->GetPrintNameForNode());
+    Location* loc = left->Emit(parent);
+    generator->GenStore(loc, right->Emit(parent));
+    return loc;
+}
   
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
     (base=b)->SetParent(this); 
@@ -60,6 +70,9 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
     (field=f)->SetParent(this);
 }
 
+Location* FieldAccess::Emit(Node* parent) {
+    return searchScope(field->getName());
+}
 
 Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     Assert(f != NULL && a != NULL); // b can be be NULL (just means no explicit base)

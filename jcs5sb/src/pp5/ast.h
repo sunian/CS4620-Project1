@@ -32,9 +32,13 @@
 #include <stdlib.h>   // for NULL
 #include "location.h"
 #include <iostream>
+#include <unordered_map>
+#include "string.h"
 #include "codegen.h"
 
+using namespace std;
 extern CodeGenerator * generator;
+
 
 class Node 
 {
@@ -43,12 +47,24 @@ class Node
     Node *parent;
 
   public:
+    unordered_map <string, Location*> scope;
     Node(yyltype loc);
     Node();
     
     yyltype *GetLocation()   { return location; }
     void SetParent(Node *p)  { parent = p; }
     Node *GetParent()        { return parent; }
+    virtual const char *GetPrintNameForNode() = 0;
+    bool isOfType(const char *name) {return 0 == strcmp(name, GetPrintNameForNode()); }
+    Location *searchScope(string name) { 
+      if (scope[name] != NULL) 
+        return scope[name]; 
+      else if (parent != NULL) 
+        return parent->searchScope(name);
+      else
+        return NULL; 
+    }
+    virtual Location* Emit(Node* parent) {return NULL;}
 };
    
 
@@ -59,6 +75,7 @@ class Identifier : public Node
     
   public:
     Identifier(yyltype loc, const char *name);
+    const char *GetPrintNameForNode()   { return "Identifier"; }
     char *getName() {return name;}
     friend std::ostream& operator<<(std::ostream& out, Identifier *id) { return out << id->name; }
 };
@@ -73,6 +90,7 @@ class Error : public Node
 {
   public:
     Error() : Node() {}
+    const char *GetPrintNameForNode()   { return "Error"; }
 };
 
 

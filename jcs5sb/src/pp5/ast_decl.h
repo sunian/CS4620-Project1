@@ -4,9 +4,6 @@
  * manage declarations. There are 4 subclasses of the base class,
  * specialized for declarations of variables, functions, classes,
  * and interfaces.
- *
- * pp5: You will need to extend the Decl classes to implement 
- * code generation for declarations.
  */
 
 #ifndef _H_ast_decl
@@ -14,9 +11,8 @@
 
 #include "ast.h"
 #include "list.h"
-#include "codegen.h"
- 
-extern CodeGenerator * generator;
+#include <string.h>
+using namespace std;
 
 class Type;
 class NamedType;
@@ -30,8 +26,8 @@ class Decl : public Node
   
   public:
     Decl(Identifier *name);
-    virtual void Emit() {}
-    friend std::ostream& operator<<(std::ostream& out, Decl *d) { return out << d->id; }
+    Identifier *getIdent() {return id;}
+    const char *getName() { return id->getName(); }
 };
 
 class VarDecl : public Decl 
@@ -41,6 +37,36 @@ class VarDecl : public Decl
     
   public:
     VarDecl(Identifier *name, Type *type);
+    const char *GetPrintNameForNode() { return "VarDecl"; }
+    Location* Emit(Node* parent);
+    Type *getType() {return type;}
+};
+
+class FnDecl : public Decl 
+{
+  protected:
+    List<VarDecl*> *formals;
+    Type *returnType;
+    Stmt *body;
+    char label[256];
+    
+  public:
+    int frameSize;
+    FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
+    void SetFunctionBody(Stmt *b);
+    const char *GetPrintNameForNode() { return "FnDecl"; }
+    Location* Emit(Node* parent);
+    const char *getLabel();
+};
+
+class InterfaceDecl : public Decl 
+{
+  protected:
+    List<Decl*> *members;
+    
+  public:
+    InterfaceDecl(Identifier *name, List<Decl*> *members);
+    const char *GetPrintNameForNode() { return "InterfaceDecl"; }
 };
 
 class ClassDecl : public Decl 
@@ -53,28 +79,10 @@ class ClassDecl : public Decl
   public:
     ClassDecl(Identifier *name, NamedType *extends, 
               List<NamedType*> *implements, List<Decl*> *members);
+    const char *GetPrintNameForNode() { return "ClassDecl"; }
+    // ClassDecl *getSuperClass();
+    // FnDecl *getOverridenFn(char *name);
 };
 
-class InterfaceDecl : public Decl 
-{
-  protected:
-    List<Decl*> *members;
-    
-  public:
-    InterfaceDecl(Identifier *name, List<Decl*> *members);
-};
-
-class FnDecl : public Decl 
-{
-  protected:
-    List<VarDecl*> *formals;
-    Type *returnType;
-    Stmt *body;
-    
-  public:
-    FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
-    void SetFunctionBody(Stmt *b);
-    void Emit();
-};
 
 #endif

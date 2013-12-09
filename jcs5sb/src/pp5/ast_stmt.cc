@@ -13,13 +13,7 @@ Program::Program(List<Decl*> *d) {
     (decls=d)->SetParentAll(this);
 }
 
-void Program::Check() {
-    /* You can use your pp3 semantic analysis or leave it out if
-     * you want to avoid the clutter.  We won't test pp5 against 
-     * semantically-invalid programs.
-     */
-}
-void Program::Emit() {
+Location* Program::Emit(Node* parent) {
     /* pp5: here is where the code generation is kicked off.
      *      The general idea is perform a tree traversal of the
      *      entire program, generating instructions as you go.
@@ -28,15 +22,48 @@ void Program::Emit() {
      *      polymorphism in the node classes.
      */
     for (int i = 0; i < decls->NumElements(); i++) {
-        decls->Nth(i)->Emit();
+        decls->Nth(i)->Emit(this);
     }
+    // generator->GenLabel("main");
+    // BeginFunc* funcHeader = generator->GenBeginFunc();
+    // funcHeader->SetFrameSize(16);
+    // Location* fortytwo = generator->GenLoadLabel("MyClass");
+    // fortytwo = generator->GenLoad(fortytwo, 0);
+    // Location* delim = generator->GenLoadConstant(-7);
+    // generator->GenBuiltInCall(PrintInt, fortytwo);
+    // generator->GenBuiltInCall(PrintInt, delim);
+    // fortytwo = generator->GenLoadLabel("meth1");
+    // generator->GenBuiltInCall(PrintInt, fortytwo);
+    // generator->GenBuiltInCall(PrintInt, delim);
+    // generator->GenACall(fortytwo, false);
+    // generator->GenEndFunc();
+    // generator->GenLabel("meth1");
+    // funcHeader = generator->GenBeginFunc();
+    // funcHeader->SetFrameSize(16);
+    // fortytwo = generator->GenLoadConstant(42);
+    // generator->GenBuiltInCall(PrintInt, fortytwo);
+    // generator->GenEndFunc();
+    // List<const char*>* methods = new List<const char*>;
+    // methods->Append("meth1");
+    // generator->GenVTable("MyClass", methods);
     generator->DoFinalCodeGen();
+    return NULL;
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
     Assert(d != NULL && s != NULL);
     (decls=d)->SetParentAll(this);
     (stmts=s)->SetParentAll(this);
+}
+
+Location* StmtBlock::Emit(Node* parent) {
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Emit(parent);
+    }
+    for (int i = 0; i < stmts->NumElements(); i++) {
+        stmts->Nth(i)->Emit(parent);
+    }
+    return NULL;
 }
 
 ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) { 

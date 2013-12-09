@@ -12,6 +12,7 @@
 #include "codegen.h"
 
 CodeGenerator * generator = new CodeGenerator();
+FnDecl* currentFrame;
 
 
 /* Function: main()

@@ -17,11 +17,12 @@
 #include <cstdlib>
 #include <list>
 #include "tac.h"
- 
 
               // These codes are used to identify the built-in functions
 typedef enum { Alloc, ReadLine, ReadInteger, StringEqual,
                PrintInt, PrintString, PrintBool, Halt, NumBuiltIns } BuiltIn;
+
+class FnDecl;
 
 class CodeGenerator {
   private:
@@ -44,6 +45,8 @@ class CodeGenerator {
     static const int VarSize = 4;
 
     static Location* ThisPtr;
+
+    FnDecl* currentFrame;
 
     CodeGenerator();
     

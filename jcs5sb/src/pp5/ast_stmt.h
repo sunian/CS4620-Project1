@@ -4,9 +4,6 @@
  * statements in the parse tree.  For each statment in the
  * language (for, if, return, etc.) there is a corresponding
  * node class for that construct. 
- *
- * pp5: You will need to extend the Stmt classes to implement
- * code generation for statements.
  */
 
 
@@ -15,9 +12,6 @@
 
 #include "list.h"
 #include "ast.h"
-#include "codegen.h"
-
-extern CodeGenerator * generator;
 
 class Decl;
 class VarDecl;
@@ -30,8 +24,8 @@ class Program : public Node
      
   public:
      Program(List<Decl*> *declList);
-     void Check();
-     void Emit();
+     const char *GetPrintNameForNode() { return "Program"; }
+     Location* Emit(Node* parent);
 };
 
 class Stmt : public Node
@@ -49,6 +43,8 @@ class StmtBlock : public Stmt
     
   public:
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
+    const char *GetPrintNameForNode() { return "StmtBlock"; }
+    Location* Emit(Node* parent);
 };
 
   
@@ -76,12 +72,14 @@ class ForStmt : public LoopStmt
   
   public:
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
+    const char *GetPrintNameForNode() { return "ForStmt"; }
 };
 
 class WhileStmt : public LoopStmt 
 {
   public:
     WhileStmt(Expr *test, Stmt *body) : LoopStmt(test, body) {}
+    const char *GetPrintNameForNode() { return "WhileStmt"; }
 };
 
 class IfStmt : public ConditionalStmt 
@@ -91,12 +89,14 @@ class IfStmt : public ConditionalStmt
   
   public:
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
+    const char *GetPrintNameForNode() { return "IfStmt"; }
 };
 
 class BreakStmt : public Stmt 
 {
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
+    const char *GetPrintNameForNode() { return "BreakStmt"; }
 };
 
 class ReturnStmt : public Stmt  
@@ -106,6 +106,7 @@ class ReturnStmt : public Stmt
   
   public:
     ReturnStmt(yyltype loc, Expr *expr);
+    const char *GetPrintNameForNode() { return "ReturnStmt"; }
 };
 
 class PrintStmt : public Stmt
@@ -115,7 +116,32 @@ class PrintStmt : public Stmt
     
   public:
     PrintStmt(List<Expr*> *arguments);
+    const char *GetPrintNameForNode() { return "PrintStmt"; }
 };
 
+
+class IntConstant;
+
+class Case : public Node
+{
+  protected:
+    IntConstant *value;
+    List<Stmt*> *stmts;
+    
+  public:
+    Case(IntConstant *v, List<Stmt*> *stmts);
+    const char *GetPrintNameForNode() { return value ? "Case" :"Default"; }
+};
+
+class SwitchStmt : public Stmt
+{
+  protected:
+    Expr *expr;
+    List<Case*> *cases;
+    
+  public:
+    SwitchStmt(Expr *e, List<Case*> *cases);
+    const char *GetPrintNameForNode() { return "SwitchStmt"; }
+};
 
 #endif

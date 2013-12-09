@@ -17,7 +17,18 @@ VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
     Assert(n != NULL && t != NULL);
     (type=t)->SetParent(this);
 }
-  
+
+Location* VarDecl::Emit(Node* parent) {
+    if (parent->isOfType("FnDecl")) {//is local var
+        FnDecl* parentFunc = (FnDecl*)parent;
+        Location* localVar = new Location(fpRelative, -4 * (parentFunc->frameSize++) - 8, getName());
+        GetParent()->scope[getName()] = localVar;
+        return localVar;
+    }
+    
+    return NULL;
+}
+
 
 ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<Decl*> *m) : Decl(n) {
     // extends can be NULL, impl & mem may be empty lists but cannot be NULL
@@ -40,17 +51,31 @@ FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
     (returnType=r)->SetParent(this);
     (formals=d)->SetParentAll(this);
     body = NULL;
+    frameSize = 0;
 }
 
 void FnDecl::SetFunctionBody(Stmt *b) { 
     (body=b)->SetParent(this);
 }
 
-void FnDecl::Emit() {
-     generator->GenLabel(id->getName());
-     BeginFunc* funcHeader = generator->GenBeginFunc();
-     funcHeader->SetFrameSize(4);
-     Location* fortytwo = generator->GenLoadConstant(42);
-     generator->GenBuiltInCall(PrintInt, fortytwo);
-     generator->GenEndFunc();
+Location* FnDecl::Emit(Node* parent) {
+    generator->GenLabel(getLabel());
+    BeginFunc* funcHeader = generator->GenBeginFunc();
+    body->Emit(this);
+    funcHeader->SetFrameSize(frameSize * 4);
+    generator->GenEndFunc();
+    
+    return NULL;
+}
+
+const char *FnDecl::getLabel() {
+    generator->currentFrame = this;
+    if (GetParent()->isOfType("Program")) {
+        if (strcmp(getName(), "main") == 0) {
+            return "main";
+        }
+        snprintf(label, sizeof label, "_%s", getName());
+        return label;
+    }
+    return "";
 }

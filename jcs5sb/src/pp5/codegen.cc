@@ -9,6 +9,8 @@
 #include <string.h>
 #include "tac.h"
 #include "mips.h"
+#include "ast.h"
+#include "ast_decl.h"
 
 Location* CodeGenerator::ThisPtr= new Location(fpRelative, 4, "this");
   
@@ -24,14 +26,14 @@ char *CodeGenerator::NewLabel()
   return strdup(temp);
 }
 
-
 Location *CodeGenerator::GenTempVar()
 {
   static int nextTempNum;
   char temp[10];
   Location *result = NULL;
   sprintf(temp, "_tmp%d", nextTempNum++);
-  result = new Location(fpRelative, -4 * nextTempNum - 4, temp);
+  Assert(currentFrame != NULL);
+  result = new Location(fpRelative, -4 * (currentFrame->frameSize++) - 8, temp);
   /* pp5: need to create variable in proper location
      in stack frame for use as temporary. Until you
      do that, the assert below will always fail to remind

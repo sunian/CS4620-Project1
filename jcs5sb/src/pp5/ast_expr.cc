@@ -82,7 +82,8 @@ Location* FieldAccess::Emit(Node* parent) {
     if (decl != NULL && decl->isOfType("VarDecl")) {
         VarDecl* varDecl = (VarDecl*)decl;
         if (varDecl->memLoc != NULL) return varDecl->memLoc;
-
+        return generator->GenLoad(CodeGenerator::ThisPtr, 4 * (varDecl->heapOffset + 1));
+        // printf("var offset=%d\n", varDecl->heapOffset);
     }
     return NULL;
 }
@@ -110,15 +111,16 @@ Location* Call::Emit(Node* parent) {
     if (base != NULL) {
         Type* baseType = base->getType();
         if (baseType != NULL && baseType->isOfType("NamedType")) {
+            Location* baseLoc = base->Emit(parent);
             NamedType* baseClass = (NamedType*)baseType;
             ClassDecl* baseDecl = (ClassDecl*)(parent->searchScope(baseClass->getName()));
-            Location* vTable = generator->GenLoadLabel(baseDecl->getName());
+            Location* vTable = generator->GenLoad(baseLoc);
             fnDecl = (FnDecl*)(baseDecl->scope[field->getName()]);
             vTable = generator->GenLoad(vTable, fnDecl->vOffset * 4);
             for (int i = actuals->NumElements() - 1; i >= 0; i--) {
                 generator->GenPushParam(actuals->Nth(i)->Emit(parent));
             }
-            generator->GenPushParam(base->Emit(parent));
+            generator->GenPushParam(baseLoc);
             returnVal = generator->GenACall(vTable, fnDecl->getReturnType() != Type::voidType);
         }
     } else {
@@ -146,7 +148,9 @@ Location* NewExpr::Emit(Node* parent) {
     if (decl != NULL && decl->isOfType("ClassDecl")) {
         ClassDecl* classDecl = (ClassDecl*)decl;
         Location* heapSize = generator->GenLoadConstant((classDecl->heapSize + 1) * 4);
-        return generator->GenBuiltInCall(Alloc, heapSize);
+        Location* newObj = generator->GenBuiltInCall(Alloc, heapSize);
+        generator->GenStore(newObj, generator->GenLoadLabel(classDecl->getName()));
+        return newObj;
     }
     return NULL;
 }

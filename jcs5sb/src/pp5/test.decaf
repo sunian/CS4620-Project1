@@ -22,12 +22,18 @@ class Cow {
 
   void Init(int w, int h)
   {
-    //weight = w;
-    //height = h;
+    weight = w;
+    height = h;
   }
 
   void Moo() {
-    Print ( this.height,-7, this.weight );
+    Print ( this.height, this.weight );
   }
 }
 
+class Sow extends Cow {
+
+  void Moo() {
+    Print ( 42 );
+  }
+}

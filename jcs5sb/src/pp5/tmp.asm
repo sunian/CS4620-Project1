@@ -3,12 +3,12 @@
 	  .align 2
 	  .globl main
   main:
-	# BeginFunc 60
+	# BeginFunc 64
 	  subu $sp, $sp, 8	# decrement sp to make space to save ra, fp
 	  sw $fp, 8($sp)	# save fp
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
-	  subu $sp, $sp, 60	# decrement sp to make space for locals/temps
+	  subu $sp, $sp, 64	# decrement sp to make space for locals/temps
 	# _tmp0 = 3
 	  li $t2, 3		# load constant value 3 into $t2
 	  sw $t2, -16($fp)	# spill _tmp0 from $t2 to $fp-16
@@ -49,68 +49,78 @@
 	  sw $t2, -32($fp)	# spill _tmp4 from $t2 to $fp-32
 	# PopParams 4
 	  add $sp, $sp, 4	# pop params off stack
+	# _tmp5 = Sow
+	  la $t2, Sow	# load label
+	  sw $t2, -36($fp)	# spill _tmp5 from $t2 to $fp-36
+	# *(_tmp4) = _tmp5
+	  lw $t0, -36($fp)	# fill _tmp5 to $t0 from $fp-36
+	  lw $t2, -32($fp)	# fill _tmp4 to $t2 from $fp-32
+	  sw $t0, 0($t2) 	# store with offset
 	# betsy = _tmp4
 	  lw $t2, -32($fp)	# fill _tmp4 to $t2 from $fp-32
 	  sw $t2, -8($fp)	# spill betsy from $t2 to $fp-8
-	# _tmp5 = Cow
-	  la $t2, Cow	# load label
-	  sw $t2, -36($fp)	# spill _tmp5 from $t2 to $fp-36
-	# _tmp6 = *(_tmp5 + 4)
-	  lw $t0, -36($fp)	# fill _tmp5 to $t0 from $fp-36
-	  lw $t2, 4($t0) 	# load with offset
+	# _tmp6 = *(betsy)
+	  lw $t0, -8($fp)	# fill betsy to $t0 from $fp-8
+	  lw $t2, 0($t0) 	# load with offset
 	  sw $t2, -40($fp)	# spill _tmp6 from $t2 to $fp-40
+	# _tmp7 = *(_tmp6 + 4)
+	  lw $t0, -40($fp)	# fill _tmp6 to $t0 from $fp-40
+	  lw $t2, 4($t0) 	# load with offset
+	  sw $t2, -44($fp)	# spill _tmp7 from $t2 to $fp-44
 	# PushParam betsy
 	  subu $sp, $sp, 4	# decrement sp to make space for param
 	  lw $t0, -8($fp)	# fill betsy to $t0 from $fp-8
 	  sw $t0, 4($sp)	# copy param value to stack
-	# ACall _tmp6
-	  lw $t0, -40($fp)	# fill _tmp6 to $t0 from $fp-40
+	# ACall _tmp7
+	  lw $t0, -44($fp)	# fill _tmp7 to $t0 from $fp-44
 	  jalr $t0            	# jump to function
 	# PopParams 4
 	  add $sp, $sp, 4	# pop params off stack
-	# _tmp7 = Cow
-	  la $t2, Cow	# load label
-	  sw $t2, -44($fp)	# spill _tmp7 from $t2 to $fp-44
-	# _tmp8 = *(_tmp7)
-	  lw $t0, -44($fp)	# fill _tmp7 to $t0 from $fp-44
+	# _tmp8 = *(betsy)
+	  lw $t0, -8($fp)	# fill betsy to $t0 from $fp-8
 	  lw $t2, 0($t0) 	# load with offset
 	  sw $t2, -48($fp)	# spill _tmp8 from $t2 to $fp-48
-	# _tmp9 = 122
-	  li $t2, 122		# load constant value 122 into $t2
+	# _tmp9 = *(_tmp8)
+	  lw $t0, -48($fp)	# fill _tmp8 to $t0 from $fp-48
+	  lw $t2, 0($t0) 	# load with offset
 	  sw $t2, -52($fp)	# spill _tmp9 from $t2 to $fp-52
-	# PushParam _tmp9
-	  subu $sp, $sp, 4	# decrement sp to make space for param
-	  lw $t0, -52($fp)	# fill _tmp9 to $t0 from $fp-52
-	  sw $t0, 4($sp)	# copy param value to stack
-	# _tmp10 = 100
-	  li $t2, 100		# load constant value 100 into $t2
+	# _tmp10 = 122
+	  li $t2, 122		# load constant value 122 into $t2
 	  sw $t2, -56($fp)	# spill _tmp10 from $t2 to $fp-56
 	# PushParam _tmp10
 	  subu $sp, $sp, 4	# decrement sp to make space for param
 	  lw $t0, -56($fp)	# fill _tmp10 to $t0 from $fp-56
 	  sw $t0, 4($sp)	# copy param value to stack
+	# _tmp11 = 100
+	  li $t2, 100		# load constant value 100 into $t2
+	  sw $t2, -60($fp)	# spill _tmp11 from $t2 to $fp-60
+	# PushParam _tmp11
+	  subu $sp, $sp, 4	# decrement sp to make space for param
+	  lw $t0, -60($fp)	# fill _tmp11 to $t0 from $fp-60
+	  sw $t0, 4($sp)	# copy param value to stack
 	# PushParam betsy
 	  subu $sp, $sp, 4	# decrement sp to make space for param
 	  lw $t0, -8($fp)	# fill betsy to $t0 from $fp-8
 	  sw $t0, 4($sp)	# copy param value to stack
-	# ACall _tmp8
-	  lw $t0, -48($fp)	# fill _tmp8 to $t0 from $fp-48
+	# ACall _tmp9
+	  lw $t0, -52($fp)	# fill _tmp9 to $t0 from $fp-52
 	  jalr $t0            	# jump to function
 	# PopParams 12
 	  add $sp, $sp, 12	# pop params off stack
-	# _tmp11 = Cow
-	  la $t2, Cow	# load label
-	  sw $t2, -60($fp)	# spill _tmp11 from $t2 to $fp-60
-	# _tmp12 = *(_tmp11 + 4)
-	  lw $t0, -60($fp)	# fill _tmp11 to $t0 from $fp-60
-	  lw $t2, 4($t0) 	# load with offset
+	# _tmp12 = *(betsy)
+	  lw $t0, -8($fp)	# fill betsy to $t0 from $fp-8
+	  lw $t2, 0($t0) 	# load with offset
 	  sw $t2, -64($fp)	# spill _tmp12 from $t2 to $fp-64
+	# _tmp13 = *(_tmp12 + 4)
+	  lw $t0, -64($fp)	# fill _tmp12 to $t0 from $fp-64
+	  lw $t2, 4($t0) 	# load with offset
+	  sw $t2, -68($fp)	# spill _tmp13 from $t2 to $fp-68
 	# PushParam betsy
 	  subu $sp, $sp, 4	# decrement sp to make space for param
 	  lw $t0, -8($fp)	# fill betsy to $t0 from $fp-8
 	  sw $t0, 4($sp)	# copy param value to stack
-	# ACall _tmp12
-	  lw $t0, -64($fp)	# fill _tmp12 to $t0 from $fp-64
+	# ACall _tmp13
+	  lw $t0, -68($fp)	# fill _tmp13 to $t0 from $fp-68
 	  jalr $t0            	# jump to function
 	# PopParams 4
 	  add $sp, $sp, 4	# pop params off stack
@@ -127,13 +137,13 @@
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
 	  subu $sp, $sp, 4	# decrement sp to make space for locals/temps
-	# _tmp13 = x * y
+	# _tmp14 = x * y
 	  lw $t0, 8($fp)	# fill x to $t0 from $fp+8
 	  lw $t1, 12($fp)	# fill y to $t1 from $fp+12
 	  mul $t2, $t0, $t1	
-	  sw $t2, -8($fp)	# spill _tmp13 from $t2 to $fp-8
-	# Return _tmp13
-	  lw $t2, -8($fp)	# fill _tmp13 to $t2 from $fp-8
+	  sw $t2, -8($fp)	# spill _tmp14 from $t2 to $fp-8
+	# Return _tmp14
+	  lw $t2, -8($fp)	# fill _tmp14 to $t2 from $fp-8
 	  move $v0, $t2		# assign return value into $v0
 	  move $sp, $fp		# pop callee frame off stack
 	  lw $ra, -4($fp)	# restore saved ra
@@ -146,23 +156,26 @@
 	  lw $fp, 0($fp)	# restore saved fp
 	  jr $ra		# return from function
   Cow_Init:
-	# BeginFunc 4
+	# BeginFunc 8
 	  subu $sp, $sp, 8	# decrement sp to make space to save ra, fp
 	  sw $fp, 8($sp)	# save fp
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
-	  subu $sp, $sp, 4	# decrement sp to make space for locals/temps
-	# _tmp14 = 73
-	  li $t2, 73		# load constant value 73 into $t2
-	  sw $t2, -8($fp)	# spill _tmp14 from $t2 to $fp-8
-	# PushParam _tmp14
-	  subu $sp, $sp, 4	# decrement sp to make space for param
-	  lw $t0, -8($fp)	# fill _tmp14 to $t0 from $fp-8
-	  sw $t0, 4($sp)	# copy param value to stack
-	# LCall _PrintInt
-	  jal _PrintInt      	# jump to function
-	# PopParams 4
-	  add $sp, $sp, 4	# pop params off stack
+	  subu $sp, $sp, 8	# decrement sp to make space for locals/temps
+	# _tmp15 = *(this + 8)
+	  lw $t0, 4($fp)	# fill this to $t0 from $fp+4
+	  lw $t2, 8($t0) 	# load with offset
+	  sw $t2, -8($fp)	# spill _tmp15 from $t2 to $fp-8
+	# _tmp15 = w
+	  lw $t2, 8($fp)	# fill w to $t2 from $fp+8
+	  sw $t2, -8($fp)	# spill _tmp15 from $t2 to $fp-8
+	# _tmp16 = *(this + 4)
+	  lw $t0, 4($fp)	# fill this to $t0 from $fp+4
+	  lw $t2, 4($t0) 	# load with offset
+	  sw $t2, -12($fp)	# spill _tmp16 from $t2 to $fp-12
+	# _tmp16 = h
+	  lw $t2, 12($fp)	# fill h to $t2 from $fp+12
+	  sw $t2, -12($fp)	# spill _tmp16 from $t2 to $fp-12
 	# EndFunc
 	# (below handles reaching end of fn body with no explicit return)
 	  move $sp, $fp		# pop callee frame off stack
@@ -170,18 +183,31 @@
 	  lw $fp, 0($fp)	# restore saved fp
 	  jr $ra		# return from function
   Cow_Moo:
-	# BeginFunc 4
+	# BeginFunc 8
 	  subu $sp, $sp, 8	# decrement sp to make space to save ra, fp
 	  sw $fp, 8($sp)	# save fp
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
-	  subu $sp, $sp, 4	# decrement sp to make space for locals/temps
-	# _tmp15 = 42
-	  li $t2, 42		# load constant value 42 into $t2
-	  sw $t2, -8($fp)	# spill _tmp15 from $t2 to $fp-8
-	# PushParam _tmp15
+	  subu $sp, $sp, 8	# decrement sp to make space for locals/temps
+	# _tmp17 = *(this + 4)
+	  lw $t0, 4($fp)	# fill this to $t0 from $fp+4
+	  lw $t2, 4($t0) 	# load with offset
+	  sw $t2, -8($fp)	# spill _tmp17 from $t2 to $fp-8
+	# PushParam _tmp17
 	  subu $sp, $sp, 4	# decrement sp to make space for param
-	  lw $t0, -8($fp)	# fill _tmp15 to $t0 from $fp-8
+	  lw $t0, -8($fp)	# fill _tmp17 to $t0 from $fp-8
+	  sw $t0, 4($sp)	# copy param value to stack
+	# LCall _PrintInt
+	  jal _PrintInt      	# jump to function
+	# PopParams 4
+	  add $sp, $sp, 4	# pop params off stack
+	# _tmp18 = *(this + 8)
+	  lw $t0, 4($fp)	# fill this to $t0 from $fp+4
+	  lw $t2, 8($t0) 	# load with offset
+	  sw $t2, -12($fp)	# spill _tmp18 from $t2 to $fp-12
+	# PushParam _tmp18
+	  subu $sp, $sp, 4	# decrement sp to make space for param
+	  lw $t0, -12($fp)	# fill _tmp18 to $t0 from $fp-12
 	  sw $t0, 4($sp)	# copy param value to stack
 	# LCall _PrintInt
 	  jal _PrintInt      	# jump to function
@@ -199,6 +225,37 @@
 	  Cow:		# label for class Cow vtable
 	  .word Cow_Init
 	  .word Cow_Moo
+	  .text
+  Sow_Moo:
+	# BeginFunc 4
+	  subu $sp, $sp, 8	# decrement sp to make space to save ra, fp
+	  sw $fp, 8($sp)	# save fp
+	  sw $ra, 4($sp)	# save ra
+	  addiu $fp, $sp, 8	# set up new fp
+	  subu $sp, $sp, 4	# decrement sp to make space for locals/temps
+	# _tmp19 = 42
+	  li $t2, 42		# load constant value 42 into $t2
+	  sw $t2, -8($fp)	# spill _tmp19 from $t2 to $fp-8
+	# PushParam _tmp19
+	  subu $sp, $sp, 4	# decrement sp to make space for param
+	  lw $t0, -8($fp)	# fill _tmp19 to $t0 from $fp-8
+	  sw $t0, 4($sp)	# copy param value to stack
+	# LCall _PrintInt
+	  jal _PrintInt      	# jump to function
+	# PopParams 4
+	  add $sp, $sp, 4	# pop params off stack
+	# EndFunc
+	# (below handles reaching end of fn body with no explicit return)
+	  move $sp, $fp		# pop callee frame off stack
+	  lw $ra, -4($fp)	# restore saved ra
+	  lw $fp, 0($fp)	# restore saved fp
+	  jr $ra		# return from function
+	# VTable for class Sow
+	  .data
+	  .align 2
+	  Sow:		# label for class Sow vtable
+	  .word Cow_Init
+	  .word Sow_Moo
 	  .text
 _PrintInt:
         subu $sp, $sp, 8

@@ -68,6 +68,11 @@ Location* ClassDecl::Emit(Node* parent) {
     for (int i = 0; i < members->NumElements(); i++) {
         members->Nth(i)->Emit(this);
     }
+    List<const char*>* vTable = new List<const char*>;
+    for (int i = 0; i < methods->NumElements(); i++) {
+        vTable->Append(methods->Nth(i)->getLabel());
+    }
+    generator->GenVTable(getName(), vTable);
     return NULL;
 }
 

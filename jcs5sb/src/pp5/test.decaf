@@ -5,13 +5,29 @@ void main()
   Cow betsy;
 int x;
 x = mult(7,3);
-Print(mult(7,4));
-  //betsy = New(Cow);
-  //betsy.Init(100, 122);
-  //betsy.Moo();
+//Print(x);
+  betsy = New(Cow);
+  betsy.Moo();
+  betsy.Init(100, 122);
+  betsy.Moo();
 }
 
 int mult(int x, int y) {
 return x * y;
+}
+
+class Cow {
+  int height;
+  int weight;
+
+  void Init(int w, int h)
+  {
+    //weight = w;
+    //height = h;
+  }
+
+  void Moo() {
+    Print ( this.height,-7, this.weight );
+  }
 }
 

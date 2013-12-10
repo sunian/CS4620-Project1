@@ -105,13 +105,32 @@ Type *Call::getType() {
 }
 
 Location* Call::Emit(Node* parent) {
-    if (base != NULL) return NULL;
-    FnDecl* fnDecl = (FnDecl*)searchScope(field->getName());
-    for (int i = actuals->NumElements() - 1; i >= 0; i--) {
-        generator->GenPushParam(actuals->Nth(i)->Emit(parent));
+    FnDecl* fnDecl;
+    Location* returnVal;
+    if (base != NULL) {
+        Type* baseType = base->getType();
+        if (baseType != NULL && baseType->isOfType("NamedType")) {
+            NamedType* baseClass = (NamedType*)baseType;
+            ClassDecl* baseDecl = (ClassDecl*)(parent->searchScope(baseClass->getName()));
+            Location* vTable = generator->GenLoadLabel(baseDecl->getName());
+            fnDecl = (FnDecl*)(baseDecl->scope[field->getName()]);
+            vTable = generator->GenLoad(vTable, fnDecl->vOffset * 4);
+            for (int i = actuals->NumElements() - 1; i >= 0; i--) {
+                generator->GenPushParam(actuals->Nth(i)->Emit(parent));
+            }
+            generator->GenPushParam(base->Emit(parent));
+            returnVal = generator->GenACall(vTable, fnDecl->getReturnType() != Type::voidType);
+        }
+    } else {
+        fnDecl = (FnDecl*)searchScope(field->getName());
+
+        for (int i = actuals->NumElements() - 1; i >= 0; i--) {
+            generator->GenPushParam(actuals->Nth(i)->Emit(parent));
+        }
+        generator->GenPushParam(CodeGenerator::ThisPtr);
+        returnVal = generator->GenLCall(fnDecl->getLabel(), fnDecl->getReturnType() != Type::voidType);
     }
-    generator->GenPushParam(base == NULL ? CodeGenerator::ThisPtr : base->Emit(parent));
-    Location* returnVal = generator->GenLCall(fnDecl->getLabel(), fnDecl->getReturnType() != Type::voidType);
+    
     generator->GenPopParams(4 * actuals->NumElements() + 4);
     return returnVal;
 } 

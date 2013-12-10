@@ -58,7 +58,7 @@ Location* CompoundExpr::Emit(Node* parent) {
 }
  
 Location* AssignExpr::Emit(Node* parent) {
-    // printf("%s\n", parent->GetPrintNameForNode());
+    // printf("Assign %s\n", parent->GetPrintNameForNode());
     Location* loc = left->Emit(parent);
     generator->GenAssign(loc, right->Emit(parent));
     return loc;
@@ -78,7 +78,13 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 }
 
 Location* FieldAccess::Emit(Node* parent) {
-    return searchScope(field->getName())->memLoc;
+    Decl* decl = searchScope(field->getName());
+    if (decl != NULL && decl->isOfType("VarDecl")) {
+        VarDecl* varDecl = (VarDecl*)decl;
+        if (varDecl->memLoc != NULL) return varDecl->memLoc;
+
+    }
+    return NULL;
 }
 
 Type *FieldAccess::getType() {
@@ -93,20 +99,21 @@ Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     (actuals=a)->SetParentAll(this);
 }
 
+Type *Call::getType() {
+    FnDecl* fnDecl = (FnDecl*)searchScope(field->getName());
+    return fnDecl->getReturnType();
+}
+
 Location* Call::Emit(Node* parent) {
-    if (base == NULL) {
-        FnDecl* fnDecl = (FnDecl*)searchScope(field->getName());
-        if (fnDecl->GetParent()->isOfType("Program")) {
-            for (int i = actuals->NumElements() - 1; i >= 0; i--) {
-                generator->GenPushParam(actuals->Nth(i)->Emit(parent));
-            }
-            Location* returnVal = generator->GenLCall(fnDecl->getLabel(), fnDecl->getReturnType() != Type::voidType);
-            generator->GenPopParams(4 * actuals->NumElements());
-            return returnVal;
-        }
-        
+    if (base != NULL) return NULL;
+    FnDecl* fnDecl = (FnDecl*)searchScope(field->getName());
+    for (int i = actuals->NumElements() - 1; i >= 0; i--) {
+        generator->GenPushParam(actuals->Nth(i)->Emit(parent));
     }
-    return NULL;
+    generator->GenPushParam(base == NULL ? CodeGenerator::ThisPtr : base->Emit(parent));
+    Location* returnVal = generator->GenLCall(fnDecl->getLabel(), fnDecl->getReturnType() != Type::voidType);
+    generator->GenPopParams(4 * actuals->NumElements() + 4);
+    return returnVal;
 } 
 
 NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) { 
@@ -114,6 +121,16 @@ NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) {
   (cType=c)->SetParent(this);
 }
 
+Location* NewExpr::Emit(Node* parent) {
+    Decl* decl = parent->searchScope(cType->getIdent()->getName());
+    // printf("%d\n", decl);
+    if (decl != NULL && decl->isOfType("ClassDecl")) {
+        ClassDecl* classDecl = (ClassDecl*)decl;
+        Location* heapSize = generator->GenLoadConstant((classDecl->heapSize + 1) * 4);
+        return generator->GenBuiltInCall(Alloc, heapSize);
+    }
+    return NULL;
+}
 
 NewArrayExpr::NewArrayExpr(yyltype loc, Expr *sz, Type *et) : Expr(loc) {
     Assert(sz != NULL && et != NULL);

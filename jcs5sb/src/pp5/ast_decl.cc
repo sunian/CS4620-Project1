@@ -19,19 +19,23 @@ VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
 
 void VarDecl::Check(Node* parent) {
     GetParent()->scope[getName()] = this;
+    if (parent->isOfType("ClassDecl")) {//is instance field
+        ClassDecl* parentClass = (ClassDecl*)parent;
+        heapOffset = parentClass->heapSize++;
+    }
 }
 
 Location* VarDecl::Emit(Node* parent) {
     if (parent->isOfType("FnDecl")) {//is local var
         FnDecl* parentFunc = (FnDecl*)parent;
         memLoc = new Location(fpRelative, -4 * (parentFunc->frameSize++) - 8, getName());
-        GetParent()->scope[getName()] = this;
         return memLoc;
+    } else if (parent->isOfType("ClassDecl")) {//is instance field
+
     }
     
     return NULL;
 }
-
 
 ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<Decl*> *m) : Decl(n) {
     // extends can be NULL, impl & mem may be empty lists but cannot be NULL
@@ -40,8 +44,71 @@ ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<D
     if (extends) extends->SetParent(this);
     (implements=imp)->SetParentAll(this);
     (members=m)->SetParentAll(this);
+    heapSize = 0;
 }
 
+ClassDecl *ClassDecl::getSuperClass(){
+    if (parent && extends) {
+        Decl *superDecl = parent->scope[extends->getName()];
+        if (superDecl != NULL && superDecl->isOfType("ClassDecl")) {
+            return (ClassDecl*)superDecl;
+        }
+    }
+    return NULL;
+}
+
+void ClassDecl::Check(Node* parent) {
+    parent->scope[getName()] = this;
+    for (int i = 0; i < members->NumElements(); i++) {
+        members->Nth(i)->Check(this);
+    }
+}
+
+Location* ClassDecl::Emit(Node* parent) {
+    for (int i = 0; i < members->NumElements(); i++) {
+        members->Nth(i)->Emit(this);
+    }
+    return NULL;
+}
+
+void ClassDecl::makeVTables() {
+    if (methods != NULL) return;
+    ClassDecl* superDecl = getSuperClass();
+    methods = new List<FnDecl*>;
+    if (superDecl != NULL) {
+        superDecl->makeVTables();
+        for (int i = 0; i < superDecl->methods->NumElements(); i++) {
+            methods->Append(superDecl->methods->Nth(i));
+            if (scope[superDecl->methods->Nth(i)->getName()] == NULL){
+                scope[superDecl->methods->Nth(i)->getName()] = superDecl->methods->Nth(i);
+            }
+        }
+        for (int i = 0; i < members->NumElements(); i++) {
+            if (members->Nth(i)->isOfType("VarDecl")) {
+                ((VarDecl*)(members->Nth(i)))->heapOffset += superDecl->heapSize;
+            }
+        }
+        heapSize += superDecl->heapSize;
+    }
+    for (int i = 0; i < members->NumElements(); i++) {
+        if (!members->Nth(i)->isOfType("FnDecl")) continue;
+        FnDecl *fnDecl = (FnDecl*)(members->Nth(i));
+        if (superDecl == NULL) {
+            fnDecl->vOffset = methods->NumElements();
+            methods->Append(fnDecl);
+            continue;
+        }
+        Decl *superMethod = superDecl->scope[fnDecl->getName()];
+        if (superMethod == NULL) {
+            fnDecl->vOffset = methods->NumElements();
+            methods->Append(fnDecl);
+            continue;
+        }
+        fnDecl->vOffset = ((FnDecl*)superMethod)->vOffset;
+        methods->RemoveAt(fnDecl->vOffset);
+        methods->InsertAt(fnDecl, fnDecl->vOffset);
+    }
+}
 
 InterfaceDecl::InterfaceDecl(Identifier *n, List<Decl*> *m) : Decl(n) {
     Assert(n != NULL && m != NULL);
@@ -70,16 +137,17 @@ void FnDecl::Check(Node* parent) {
 }
 
 Location* FnDecl::Emit(Node* parent) {
+    // printf("Function: %s\n", getLabel());
     generator->currentFrame = this;
     for (int i = 0; i < formals->NumElements(); i++) {
-        formals->Nth(i)->memLoc = new Location(fpRelative, 4 * i + 4, formals->Nth(i)->getName());
+        formals->Nth(i)->memLoc = new Location(fpRelative, 4 * i + 8, formals->Nth(i)->getName());
     }
     generator->GenLabel(getLabel());
     BeginFunc* funcHeader = generator->GenBeginFunc();
     body->Emit(this);
     funcHeader->SetFrameSize(frameSize * 4);
     generator->GenEndFunc();
-    
+    // printf("End Function: %s\n", getLabel());
     return NULL;
 }
 
@@ -91,5 +159,6 @@ const char *FnDecl::getLabel() {
         snprintf(label, sizeof label, "_%s", getName());
         return label;
     }
-    return "";
+    snprintf(label, sizeof label, "%s_%s",((ClassDecl*)GetParent())->getName(), getName());
+    return label;
 }

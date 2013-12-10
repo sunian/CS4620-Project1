@@ -37,6 +37,7 @@ class VarDecl : public Decl
     Type *type;
     
   public:
+    int heapOffset;
     VarDecl(Identifier *name, Type *type);
     const char *GetPrintNameForNode() { return "VarDecl"; }
     Location* Emit(Node* parent);
@@ -54,6 +55,7 @@ class FnDecl : public Decl
     
   public:
     int frameSize;
+    int vOffset;
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
     void SetFunctionBody(Stmt *b);
     const char *GetPrintNameForNode() { return "FnDecl"; }
@@ -81,9 +83,15 @@ class ClassDecl : public Decl
     List<NamedType*> *implements;
 
   public:
+    int heapSize;
+    List<FnDecl*> *methods;
     ClassDecl(Identifier *name, NamedType *extends, 
               List<NamedType*> *implements, List<Decl*> *members);
     const char *GetPrintNameForNode() { return "ClassDecl"; }
+    ClassDecl *getSuperClass();
+    Location* Emit(Node* parent);
+    void Check(Node* parent);
+    void makeVTables();
     // ClassDecl *getSuperClass();
     // FnDecl *getOverridenFn(char *name);
 };

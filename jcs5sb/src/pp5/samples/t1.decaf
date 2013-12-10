@@ -2,12 +2,12 @@
 
 void main() {
   int c;
-  string s;
+//  string s;
 
-  s = "hello";
+//  s = "hello";
   c = test(4, 5);
   Print(c);
-  Print(s);
+//  Print(s);
 }
 
 int test(int a, int b) {

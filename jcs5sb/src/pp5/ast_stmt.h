@@ -27,6 +27,7 @@ class Program : public Node
      const char *GetPrintNameForNode() { return "Program"; }
      Location* Emit(Node* parent);
      void Check(Node* parent);
+     void makeVTables();
 };
 
 class Stmt : public Node

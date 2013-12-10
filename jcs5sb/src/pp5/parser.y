@@ -103,6 +103,7 @@ Program   :    DeclList            {
                                         program->Check(NULL);
                                         Decl* main = program->searchScope("main");
                                         if (main != NULL && main->isOfType("FnDecl")) {
+                                          program->makeVTables();
                                           program->Emit(NULL); 
                                         } else {
                                           printf("***Linker: function 'main' not defined\n");

@@ -13,6 +13,14 @@ Program::Program(List<Decl*> *d) {
     (decls=d)->SetParentAll(this);
 }
 
+void Program::makeVTables() {
+    for (int i = 0; i < decls->NumElements(); i++) {
+        if (decls->Nth(i)->isOfType("ClassDecl")) {
+            ((ClassDecl*)decls->Nth(i))->makeVTables();
+        }
+    }
+}
+
 void Program::Check(Node* parent) {
     for (int i = 0; i < decls->NumElements(); i++) {
         decls->Nth(i)->Check(this);

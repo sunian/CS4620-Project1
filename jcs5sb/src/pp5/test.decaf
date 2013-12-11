@@ -1,5 +1,6 @@
 class A {
 B myB;
+
 void init(int newVal){
 myB = New(B);
 myB.init(newVal);
@@ -11,9 +12,10 @@ return myB;
 }
 
 class B {
+A recurse;
 int[] val;
 void init(int newVal) {
-this.val = NewArray(9, int);
+val = NewArray(9, int);
 val[0] = newVal;
 }
 int[] getVal() {return val;}

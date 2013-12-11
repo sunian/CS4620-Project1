@@ -9,8 +9,8 @@
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
 	  subu $sp, $sp, 28	# decrement sp to make space for locals/temps
-	# _tmp0 = 8
-	  li $t2, 8		# load constant value 8 into $t2
+	# _tmp0 = 12
+	  li $t2, 12		# load constant value 12 into $t2
 	  sw $t2, -8($fp)	# spill _tmp0 from $t2 to $fp-8
 	# PushParam _tmp0
 	  subu $sp, $sp, 4	# decrement sp to make space for param
@@ -127,13 +127,13 @@
 	  sw $t2, -20($fp)	# spill _tmp11 from $t2 to $fp-20
 	# PopParams 4
 	  add $sp, $sp, 4	# pop params off stack
-	# *(this + 4) = _tmp11
+	# *(this + 8) = _tmp11
 	  lw $t0, -20($fp)	# fill _tmp11 to $t0 from $fp-20
 	  lw $t2, 4($fp)	# fill this to $t2 from $fp+4
-	  sw $t0, 4($t2) 	# store with offset
-	# _tmp12 = *(this + 4)
+	  sw $t0, 8($t2) 	# store with offset
+	# _tmp12 = *(this + 8)
 	  lw $t0, 4($fp)	# fill this to $t0 from $fp+4
-	  lw $t2, 4($t0) 	# load with offset
+	  lw $t2, 8($t0) 	# load with offset
 	  sw $t2, -24($fp)	# spill _tmp12 from $t2 to $fp-24
 	# _tmp13 = 0
 	  li $t2, 0		# load constant value 0 into $t2
@@ -147,7 +147,7 @@
 	  mul $t2, $t0, $t1	
 	  sw $t2, -36($fp)	# spill _tmp15 from $t2 to $fp-36
 	# _tmp16 = val + _tmp15
-	  lw $t0, 4($gp)	# fill val to $t0 from $gp+4
+	  lw $t0, 8($gp)	# fill val to $t0 from $gp+8
 	  lw $t1, -36($fp)	# fill _tmp15 to $t1 from $fp-36
 	  add $t2, $t0, $t1	
 	  sw $t2, -40($fp)	# spill _tmp16 from $t2 to $fp-40
@@ -172,9 +172,9 @@
 	  sw $ra, 4($sp)	# save ra
 	  addiu $fp, $sp, 8	# set up new fp
 	  subu $sp, $sp, 4	# decrement sp to make space for locals/temps
-	# _tmp18 = *(this + 4)
+	# _tmp18 = *(this + 8)
 	  lw $t0, 4($fp)	# fill this to $t0 from $fp+4
-	  lw $t2, 4($t0) 	# load with offset
+	  lw $t2, 8($t0) 	# load with offset
 	  sw $t2, -8($fp)	# spill _tmp18 from $t2 to $fp-8
 	# Return _tmp18
 	  lw $t2, -8($fp)	# fill _tmp18 to $t2 from $fp-8

@@ -39,7 +39,7 @@ Location* StringConstant::Emit(Node* parent) {
 }
 
 Location* NullConstant::Emit(Node* parent) {
-    return generator->GenLoadConstant(NULL);
+    return generator->GenLoadConstant((char*)NULL);
 }
 
 Operator::Operator(yyltype loc, const char *tok) : Node(loc) {

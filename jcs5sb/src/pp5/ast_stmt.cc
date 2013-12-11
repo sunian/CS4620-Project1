@@ -11,6 +11,7 @@
 Program::Program(List<Decl*> *d) {
     Assert(d != NULL);
     (decls=d)->SetParentAll(this);
+    globalOffset = 0;
 }
 
 void Program::makeVTables() {
@@ -95,10 +96,38 @@ ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) {
     (body=b)->SetParent(this);
 }
 
+void ConditionalStmt::Check(Node* parent) {
+    body->Check(parent);
+}
+
 ForStmt::ForStmt(Expr *i, Expr *t, Expr *s, Stmt *b): LoopStmt(t, b) { 
     Assert(i != NULL && t != NULL && s != NULL && b != NULL);
     (init=i)->SetParent(this);
     (step=s)->SetParent(this);
+}
+
+Location* ForStmt::Emit(Node* parent) {
+    char* forStart = generator->NewLabel();
+    breakLabel = generator->NewLabel();
+    init->Emit(parent);
+    generator->GenLabel(forStart);
+    generator->GenIfZ(test->Emit(parent), breakLabel);
+    body->Emit(parent);
+    step->Emit(parent);
+    generator->GenGoto(forStart);
+    generator->GenLabel(breakLabel);
+    return NULL;
+}
+
+Location* WhileStmt::Emit(Node* parent) {
+    char* whileStart = generator->NewLabel();
+    breakLabel = generator->NewLabel();
+    generator->GenLabel(whileStart);
+    generator->GenIfZ(test->Emit(parent), breakLabel);
+    body->Emit(parent);
+    generator->GenGoto(whileStart);
+    generator->GenLabel(breakLabel);
+    return NULL;
 }
 
 IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) { 
@@ -107,6 +136,31 @@ IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) {
     if (elseBody) elseBody->SetParent(this);
 }
 
+void IfStmt::Check(Node* parent) {
+    body->Check(parent);
+    if (elseBody) elseBody->Check(parent);
+}
+
+Location* IfStmt::Emit(Node* parent) {
+    char* ifEnd = generator->NewLabel();
+    char* elseStart = generator->NewLabel();
+    generator->GenIfZ(test->Emit(parent), elseBody == NULL ? ifEnd : elseStart);
+    body->Emit(parent);
+    if (elseBody) {
+        generator->GenGoto(ifEnd);
+        generator->GenLabel(elseStart);
+        elseBody->Emit(parent);
+    }
+    generator->GenLabel(ifEnd);
+    return NULL;
+}
+
+Location* BreakStmt::Emit(Node* parent) {
+    Node* myP = GetParent();
+    while (!(myP->isOfType("ForStmt") || myP->isOfType("WhileStmt"))) myP = myP->GetParent();
+    generator->GenGoto(((ConditionalStmt*)myP)->breakLabel);
+    return NULL;
+}
 
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) { 
     Assert(e != NULL);
@@ -127,7 +181,11 @@ Location* PrintStmt::Emit(Node* parent) {
     for (int i = 0; i < args->NumElements(); i++) {
         if (args->Nth(i)->getType() == Type::intType) {
             generator->GenBuiltInCall(PrintInt, args->Nth(i)->Emit(parent));
-        }
+        } else if (args->Nth(i)->getType() == Type::boolType) {
+            generator->GenBuiltInCall(PrintBool, args->Nth(i)->Emit(parent));
+        } else if (args->Nth(i)->getType() == Type::stringType) {
+            generator->GenBuiltInCall(PrintString, args->Nth(i)->Emit(parent));
+        }  
         
     }
     return NULL;

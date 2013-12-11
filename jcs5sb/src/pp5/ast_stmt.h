@@ -23,6 +23,7 @@ class Program : public Node
      List<Decl*> *decls;
      
   public:
+    int globalOffset;
      Program(List<Decl*> *declList);
      const char *GetPrintNameForNode() { return "Program"; }
      Location* Emit(Node* parent);
@@ -58,7 +59,9 @@ class ConditionalStmt : public Stmt
     Stmt *body;
   
   public:
+    char* breakLabel;
     ConditionalStmt(Expr *testExpr, Stmt *body);
+    void Check(Node* parent);
 };
 
 class LoopStmt : public ConditionalStmt 
@@ -76,6 +79,7 @@ class ForStmt : public LoopStmt
   public:
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
     const char *GetPrintNameForNode() { return "ForStmt"; }
+    Location* Emit(Node* parent);
 };
 
 class WhileStmt : public LoopStmt 
@@ -83,6 +87,7 @@ class WhileStmt : public LoopStmt
   public:
     WhileStmt(Expr *test, Stmt *body) : LoopStmt(test, body) {}
     const char *GetPrintNameForNode() { return "WhileStmt"; }
+    Location* Emit(Node* parent);
 };
 
 class IfStmt : public ConditionalStmt 
@@ -93,6 +98,8 @@ class IfStmt : public ConditionalStmt
   public:
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
     const char *GetPrintNameForNode() { return "IfStmt"; }
+    Location* Emit(Node* parent);
+    void Check(Node* parent);
 };
 
 class BreakStmt : public Stmt 
@@ -100,6 +107,7 @@ class BreakStmt : public Stmt
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
     const char *GetPrintNameForNode() { return "BreakStmt"; }
+    Location* Emit(Node* parent);
 };
 
 class ReturnStmt : public Stmt  

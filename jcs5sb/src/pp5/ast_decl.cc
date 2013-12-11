@@ -30,8 +30,8 @@ Location* VarDecl::Emit(Node* parent) {
         FnDecl* parentFunc = (FnDecl*)parent;
         memLoc = new Location(fpRelative, -4 * (parentFunc->frameSize++) - 8, getName());
         return memLoc;
-    } else if (parent->isOfType("ClassDecl")) {//is instance field
-
+    } else if (parent->isOfType("Program")) {//is global variable
+        memLoc = new Location(gpRelative, 4 * (((Program*)parent)->globalOffset++), getName());
     }
     
     return NULL;

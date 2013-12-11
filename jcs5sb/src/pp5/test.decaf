@@ -1,39 +1,30 @@
-
-void main()
-{
-
-  Cow betsy;
-int x;
-x = mult(7,3);
-//Print(x);
-  betsy = New(Cow);
-  betsy.Moo();
-  betsy.Init(100, 122);
-  betsy.Moo();
+class A {
+B myB;
+void init(int newVal){
+myB = New(B);
+myB.init(newVal);
 }
 
-int mult(int x, int y) {
-return x * y;
+B getB(){
+return myB;
+}
 }
 
-class Cow {
-  int height;
-  int weight;
-
-  void Init(int w, int h)
-  {
-    weight = w;
-    height = h;
-  }
-
-  void Moo() {
-    Print ( this.height, this.weight );
-  }
+class B {
+int[] val;
+void init(int newVal) {
+this.val = NewArray(9, int);
+val[0] = newVal;
+}
+int[] getVal() {return val;}
 }
 
-class Sow extends Cow {
+void main() {
+A a;
 
-  void Moo() {
-    Print ( 42 );
-  }
+a = New(A);
+a.init(42);
+Print(a.getB().getVal()[0]);
 }
+
+

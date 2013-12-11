@@ -57,6 +57,7 @@ class DoubleConstant : public Expr
     DoubleConstant(yyltype loc, double val);
     const char *GetPrintNameForNode() { return "DoubleConstant"; }
     Type *getType() {return Type::doubleType;}
+
 };
 
 class BoolConstant : public Expr 
@@ -68,6 +69,7 @@ class BoolConstant : public Expr
     BoolConstant(yyltype loc, bool val);
     const char *GetPrintNameForNode() { return "BoolConstant"; }
     Type *getType() {return Type::boolType;}
+    Location* Emit(Node* parent);
 };
 
 class StringConstant : public Expr 
@@ -79,6 +81,7 @@ class StringConstant : public Expr
     StringConstant(yyltype loc, const char *val);
     const char *GetPrintNameForNode() { return "StringConstant"; }
     Type *getType() {return Type::stringType;}
+    Location* Emit(Node* parent);
 };
 
 class NullConstant: public Expr 
@@ -87,6 +90,7 @@ class NullConstant: public Expr
     NullConstant(yyltype loc) : Expr(loc) {}
     const char *GetPrintNameForNode() { return "NullConstant"; }
     Type *getType() {return Type::nullType;}
+    Location* Emit(Node* parent);
 };
 
 class Operator : public Node 
@@ -118,6 +122,7 @@ class ArithmeticExpr : public CompoundExpr
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
     const char *GetPrintNameForNode() { return "ArithmeticExpr"; }
+    Type *getType() {return Type::intType;}
 };
 
 class RelationalExpr : public CompoundExpr 
@@ -125,6 +130,7 @@ class RelationalExpr : public CompoundExpr
   public:
     RelationalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     const char *GetPrintNameForNode() { return "RelationalExpr"; }
+    Type *getType() {return Type::boolType;}
 };
 
 class EqualityExpr : public CompoundExpr 
@@ -132,6 +138,7 @@ class EqualityExpr : public CompoundExpr
   public:
     EqualityExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     const char *GetPrintNameForNode() { return "EqualityExpr"; }
+    Type *getType() {return Type::boolType;}
 };
 
 class LogicalExpr : public CompoundExpr 
@@ -140,6 +147,7 @@ class LogicalExpr : public CompoundExpr
     LogicalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     LogicalExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
     const char *GetPrintNameForNode() { return "LogicalExpr"; }
+    Type *getType() {return Type::boolType;}
 };
 
 class AssignExpr : public CompoundExpr 
@@ -171,6 +179,8 @@ class ArrayAccess : public LValue
   public:
     ArrayAccess(yyltype loc, Expr *base, Expr *subscript);
     const char *GetPrintNameForNode() { return "ArrayAccess"; }
+    Location* Emit(Node* parent);
+    Type *getType();
 };
 
 /* Note that field access is used both for qualified names
@@ -188,6 +198,7 @@ class FieldAccess : public LValue
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
     const char *GetPrintNameForNode() { return "FieldAccess"; }
     Location* Emit(Node* parent);
+    VarDecl* getVarDecl();
     Type *getType();
 };
 
@@ -229,6 +240,7 @@ class NewArrayExpr : public Expr
   public:
     NewArrayExpr(yyltype loc, Expr *sizeExpr, Type *elemType);
     const char *GetPrintNameForNode() { return "NewArrayExpr"; }
+    Location* Emit(Node* parent);
 };
 
 class ReadIntegerExpr : public Expr
@@ -236,6 +248,8 @@ class ReadIntegerExpr : public Expr
   public:
     ReadIntegerExpr(yyltype loc) : Expr(loc) {}
     const char *GetPrintNameForNode() { return "ReadIntegerExpr"; }
+    Location* Emit(Node* parent);
+    Type *getType() {return Type::intType;}
 };
 
 class ReadLineExpr : public Expr
@@ -243,6 +257,8 @@ class ReadLineExpr : public Expr
   public:
     ReadLineExpr(yyltype loc) : Expr (loc) {}
     const char *GetPrintNameForNode() { return "ReadLineExpr"; }
+    Location* Emit(Node* parent);
+    Type *getType() {return Type::stringType;}
 };
 
 class PostfixExpr : public Expr
